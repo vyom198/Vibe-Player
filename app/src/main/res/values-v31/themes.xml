@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.VibePlayer" parent="android:Theme.Material.Light.NoActionBar" />
-    <style name="Theme.VibePlayer.Starting" parent="Theme.VibePlayer">
+
+    <style name="Theme.VibePlayer.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/almost_black</item>
         <item name="postSplashScreenTheme">@style/Theme.VibePlayer</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/vlogo</item>

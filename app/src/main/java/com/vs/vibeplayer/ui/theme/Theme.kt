@@ -12,6 +12,8 @@ private val DarkColorScheme = darkColorScheme(
     background = AlmostBlack,
     surface = AlmostBlack,
     onPrimary = White,
+    onSurface = White,
+
 )
 
 @Composable

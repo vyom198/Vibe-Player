@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.vs.vibeplayer.mainscreen.presentation.PermissionScreen
 import com.vs.vibeplayer.ui.theme.VibePlayerTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,28 +23,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             VibePlayerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    PermissionScreen(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    VibePlayerTheme {
-        Greeting("Android")
     }
 }

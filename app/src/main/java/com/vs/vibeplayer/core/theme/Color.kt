@@ -1,4 +1,4 @@
-package com.vs.vibeplayer.ui.theme
+package com.vs.vibeplayer.core.theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color

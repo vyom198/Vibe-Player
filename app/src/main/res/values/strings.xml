@@ -3,6 +3,8 @@
     <string name="vibe_player">VibePlayer</string>
     <string name="permission_rationale">VibePlayer needs access to your music files to build\nyour library and play songs</string>
     <string name="allow_access">Allow Access</string>
+    <string name="permission_needed">VibePlayer needs access to your music files to\nfunction properly. Without this permission, the app cannot build your music library or play\nsongs.</string>
+    <string name="permission_required">Permission Required</string>
 
 </resources>
 

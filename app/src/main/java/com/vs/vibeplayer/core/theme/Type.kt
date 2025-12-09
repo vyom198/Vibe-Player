@@ -1,4 +1,4 @@
-package com.vs.vibeplayer.ui.theme
+package com.vs.vibeplayer.core.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
@@ -8,7 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.vs.vibeplayer.R
 
-val Grot = androidx.compose.ui.text.font.FontFamily(
+val Grot = FontFamily(
     Font(R.font.hostgrotesk_semibold, FontWeight.SemiBold),
     Font(R.font.hostgrotesk_medium, FontWeight.Medium),
     Font(R.font.hostgrotesk_regular,FontWeight.Normal),

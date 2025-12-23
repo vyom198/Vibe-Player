@@ -13,17 +13,17 @@ val LightSteelBlue = Color(0xFFA7BBD1)
 val SlateGrey = Color(0xFF4C647C)
 val AlmostBlack = Color(0xFF0A131D)
 val DarkSlateGrey = Color(0xFF1A2735)
-val PaleYellowGreen = Color(0xFFF1FF95)
+val Accent = Color(0xFFF1FF95)
 
 
 val ColorScheme.primary30 :Color
     get() = LightPurple30
 
 val ColorScheme.accent :Color
-    get() = PaleYellowGreen
+    get() = Accent
 
 val ColorScheme.hover : Color
-    get() = DarkBlueGrey28
+    get() = DarkSlateGrey
 
 val ColorScheme.disabled :Color
     get() = SlateGrey

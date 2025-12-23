@@ -1,3 +1,5 @@
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -73,5 +75,7 @@ dependencies {
     // Logging
     implementation(libs.timber)
 
-
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.androidx.material.icons.extended)
 }

@@ -5,6 +5,11 @@
     <string name="allow_access">Allow Access</string>
     <string name="permission_needed">VibePlayer needs access to your music files to\nfunction properly. Without this permission, the app cannot build your music library or play\nsongs.</string>
     <string name="permission_required">Permission Required</string>
+    <string name="no_music_found">No music found</string>
+    <string name="try_scanning_again">Try scanning again or check your folders.</string>
+    <string name="scan_again">Scan Again</string>
+    <string name="scanning_your_device_for_music">Scanning your device for music...</string>
+    <string name="scan_screen">Scan Screen\n</string>
 
 </resources>
 

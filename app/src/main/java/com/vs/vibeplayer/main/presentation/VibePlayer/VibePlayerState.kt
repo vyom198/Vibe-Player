@@ -1,6 +1,10 @@
 package com.vs.vibeplayer.main.presentation.VibePlayer
 
+import com.vs.vibeplayer.main.presentation.model.AudioTrackUI
+
+
 data class VibePlayerState(
-    val paramOne: String = "default",
-    val paramTwo: List<String> = emptyList(),
-)
+    val scanning: Boolean = false,
+    val trackList: List<AudioTrackUI> = emptyList(),
+
+    )

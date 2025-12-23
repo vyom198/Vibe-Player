@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vs.vibeplayer.R
 import com.vs.vibeplayer.core.buttons.VButton
+import com.vs.vibeplayer.core.theme.bodyMediumRegular
 import org.koin.androidx.compose.koinViewModel
 
 
@@ -79,7 +80,7 @@ fun PermissionScreen(modifier: Modifier = Modifier,
             )
             Text(
                 text = stringResource(R.string.permission_rationale),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMediumRegular,
                 color = MaterialTheme.colorScheme.secondary,
                 textAlign = TextAlign.Center
 

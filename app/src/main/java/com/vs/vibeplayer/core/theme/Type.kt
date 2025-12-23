@@ -1,6 +1,7 @@
 package com.vs.vibeplayer.core.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -15,24 +16,47 @@ val Grot = FontFamily(
 //    Font(R.font.hostgrotesk_bold,FontWeight.Bold),
 //    Font(R.font.hostgrotesk_extrabold,FontWeight.ExtraBold),
 )
-val Typography = Typography(
-    bodyMedium = TextStyle(
-        fontFamily = Grot,
-        fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 18.sp,
-    ),
-    bodyLarge=  TextStyle(
+val Typography.bodyLargeRegular: TextStyle
+    @Composable
+    get() = TextStyle(
         fontFamily = Grot,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 22.sp,
-    ),
+    )
+
+val Typography.bodyLargeMedium: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = Grot,
+        fontWeight = FontWeight.Medium,
+        fontSize = 16.sp,
+        lineHeight = 22.sp,
+    )
+
+val Typography.bodyMediumRegular: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = Grot,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
+        lineHeight = 18.sp,
+    )
+
+val Typography.bodySmallRegular: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = Grot,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+    )
+val Typography = Typography(
     titleLarge = TextStyle(
         fontFamily = Grot,
         fontWeight = FontWeight.Medium,
-        fontSize = 24.sp,
-        lineHeight = 28.sp,
+        fontSize = 28.sp,
+        lineHeight = 32.sp,
     ),
     titleMedium = TextStyle(
         fontFamily = Grot,
@@ -40,12 +64,4 @@ val Typography = Typography(
         fontSize = 20.sp,
         lineHeight = 24.sp,
     ),
-    labelMedium = TextStyle(
-        fontFamily = Grot,
-        fontWeight = FontWeight.Medium,
-        fontSize = 16.sp,
-        lineHeight = 22.sp,
-    ),
-
-
 )

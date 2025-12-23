@@ -10,4 +10,6 @@ sealed interface NavigationRoute {
      data object VibePlayer
 
 
+    @Serializable
+    data object ScanScreen
 }

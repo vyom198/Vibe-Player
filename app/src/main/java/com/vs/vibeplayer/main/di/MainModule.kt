@@ -6,7 +6,6 @@ import com.vs.vibeplayer.main.data.audio.MediaAudioDataSource
 import com.vs.vibeplayer.main.domain.audio.AudioDataSource
 import com.vs.vibeplayer.main.presentation.VibePlayer.VibePlayerViewModel
 import com.vs.vibeplayer.main.presentation.permission.PermissionViewModel
-import com.vs.vibeplayer.main.presentation.scan.ScanViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.compose.getKoin
 import org.koin.core.module.dsl.singleOf
@@ -23,5 +22,5 @@ val mainModule = module {
     singleOf(::MediaAudioDataSource) bind AudioDataSource::class
     viewModelOf(::PermissionViewModel)
     viewModelOf(::VibePlayerViewModel)
-    viewModelOf(::ScanViewModel)
+
 }

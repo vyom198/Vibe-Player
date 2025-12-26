@@ -6,8 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.vs.vibeplayer.main.presentation.VibePlayer.VibePlayerRoot
 import com.vs.vibeplayer.main.presentation.permission.PermissionScreen
-import com.vs.vibeplayer.main.presentation.scan.ScanRoot
-import com.vs.vibeplayer.main.presentation.scan.ScanScreen
+import com.vs.vibeplayer.main.presentation.VibePlayer.scan.ScanRoot
 
 @Composable
 fun NavigationRoot(
@@ -26,7 +25,7 @@ fun NavigationRoot(
                         popUpTo(NavigationRoute.Permission) {
                             inclusive = true
                         }
-                        launchSingleTop
+                        launchSingleTop = true
                     }
 
                 }
@@ -38,16 +37,25 @@ fun NavigationRoot(
             VibePlayerRoot(
                 NavigateToScanScreen = {
                     navController.navigate(NavigationRoute.ScanScreen){
-                        popUpTo(NavigationRoute.VibePlayer) {
-                            inclusive = true
-                        }
-                        launchSingleTop
+                        launchSingleTop = true
                     }
                 }
             )
         }
         composable<NavigationRoute.ScanScreen> {
-            ScanRoot()
+            ScanRoot(
+                onBackClick = {
+                    navController.navigate(NavigationRoute.VibePlayer){
+                        popUpTo(NavigationRoute.ScanScreen) {
+                            inclusive = true
+                        }
+                        launchSingleTop =true
+                    }
+                },
+                onMainScreen = {
+                          navController.popBackStack()
+                }
+            )
 
         }
     }

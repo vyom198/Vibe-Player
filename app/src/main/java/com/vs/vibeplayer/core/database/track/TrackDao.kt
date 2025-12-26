@@ -1,0 +1,31 @@
+package com.vs.vibeplayer.core.database.track
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface TrackDao {
+
+    @Query("SELECT * FROM trackentity ")
+    fun observeTracks(): Flow<List<TrackEntity>>
+
+    @Query("DELETE FROM trackentity")
+    suspend fun deleteAllTracks()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllTracks(tracks : List<TrackEntity>)
+
+    @Delete
+    suspend fun deleteTrack(track: TrackEntity)
+
+
+    @Query("SELECT * FROM trackentity WHERE id = :trackId")
+    suspend fun getTrackById(trackId: String): TrackEntity?
+
+    @Query("SELECT COUNT(*) FROM trackentity")
+    suspend fun getTrackCount(): Int
+}

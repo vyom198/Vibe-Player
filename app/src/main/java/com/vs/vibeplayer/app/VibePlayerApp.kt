@@ -3,6 +3,7 @@ package com.vs.vibeplayer.app
 import android.app.Application
 import com.vs.vibeplayer.BuildConfig
 import com.vs.vibeplayer.app.di.appModule
+import com.vs.vibeplayer.core.database.di.databaseModule
 import com.vs.vibeplayer.main.di.mainModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +26,8 @@ class VibePlayerApp: Application() {
             androidContext(this@VibePlayerApp)
             modules(
                 appModule,
-                mainModule
+                mainModule,
+                databaseModule
             )
         }
     }

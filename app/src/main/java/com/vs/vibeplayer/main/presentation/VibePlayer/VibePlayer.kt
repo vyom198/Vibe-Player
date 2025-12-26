@@ -42,6 +42,7 @@ import com.vs.vibeplayer.main.presentation.VibePlayer.components.AudioList
 import com.vs.vibeplayer.main.presentation.VibePlayer.components.EmptyScreen
 import com.vs.vibeplayer.main.presentation.components.Loader
 import org.koin.androidx.compose.koinViewModel
+import timber.log.Timber
 
 @Composable
 fun VibePlayerRoot(
@@ -49,9 +50,6 @@ fun VibePlayerRoot(
     NavigateToScanScreen : () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(state) {
-        println("DEBUG: Current state - scanning: ${state.scanning}, trackList size: ${state.trackList.size}")
-    }
     VibePlayerScreen(
         state = state,
         onAction = viewModel::onAction,
@@ -119,7 +117,7 @@ fun VibePlayerScreen(
                 state.scanning ->{
                    Column (modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,
                        verticalArrangement = Arrangement.Center) {
-                        Loader()
+                        Loader(isScannigInMainScreen = state.scanning)
                         Spacer(modifier = Modifier.height(20.dp))
                         Text(text = stringResource(R.string.scanning_your_device_for_music),
                             style = MaterialTheme.typography.bodyMediumRegular,
@@ -138,8 +136,8 @@ fun VibePlayerScreen(
                 }
 
                 else ->{
-                    AudioList(list = state.trackList)
-
+                    AudioList(audioList = state.trackList)
+                    Timber.d("${state.trackList.size}")
                 }
             }
 

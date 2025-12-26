@@ -5,9 +5,12 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
     alias(libs.plugins.jetbrains.kotlin.serialization)
 }
-
+room {
+    schemaDirectory("$projectDir/schemas")
+}
 android {
     namespace = "com.vs.vibeplayer"
     compileSdk = 36
@@ -70,7 +73,10 @@ dependencies {
     // Navigation
     implementation(libs.androidx.compose.navigation)
     implementation(libs.kotlinx.serialization.json)
-
+    // Database - Room
+    implementation(libs.room.ktx)
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
 
     // Logging
     implementation(libs.timber)

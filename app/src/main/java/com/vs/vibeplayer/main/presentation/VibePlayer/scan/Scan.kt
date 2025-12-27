@@ -96,7 +96,6 @@ fun ScanRoot(
         onBackClick = onBackClick,
         snackbarHostState = snackbarHostState,
         message = message,
-        scanCompleted = scanCompleted,
         onMainScreen = onMainScreen
     )
 }
@@ -106,7 +105,6 @@ fun ScanRoot(
 fun ScanScreen(
     state: VibePlayerState,
     onBackClick : () -> Unit,
-    scanCompleted : MutableState<Boolean>,
     snackbarHostState: SnackbarHostState,
     onAction: (VibePlayerAction) -> Unit,
     message : MutableState<String>,

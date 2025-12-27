@@ -1,7 +1,6 @@
 package com.vs.vibeplayer.core.database.track
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -19,12 +18,12 @@ interface TrackDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllTracks(tracks : List<TrackEntity>)
 
-    @Delete
-    suspend fun deleteTrack(track: TrackEntity)
+    @Query("DELETE FROM trackentity WHERE id IN (:ids)")
+    suspend fun deleteTracksfromIds(ids: List<Long>)
 
 
     @Query("SELECT * FROM trackentity WHERE id = :trackId")
-    suspend fun getTrackById(trackId: String): TrackEntity?
+    suspend fun getTrackById(trackId: Long): TrackEntity?
 
     @Query("SELECT COUNT(*) FROM trackentity")
     suspend fun getTrackCount(): Int

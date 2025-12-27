@@ -3,32 +3,31 @@ package com.vs.vibeplayer.main.presentation.VibePlayer
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vs.vibeplayer.core.database.track.TrackDao
 import com.vs.vibeplayer.main.domain.audio.AudioDataSource
 import com.vs.vibeplayer.main.presentation.model.AudioTrackUI
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.delayFlow
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import androidx.core.net.toUri
+import com.vs.vibeplayer.core.database.track.TrackEntity
+import com.vs.vibeplayer.main.data.audio.ContentUriChecker
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+
 
 class VibePlayerViewModel(
     private val audioDataSource: AudioDataSource,
-    private val  trackDao: TrackDao
+    private val  trackDao: TrackDao,
+    private val contentUriChecker: ContentUriChecker
 ) : ViewModel() {
     private val eventChannel = Channel<VibePlayerEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -54,18 +53,20 @@ class VibePlayerViewModel(
             try {
                 trackDao.observeTracks().collect { audioTracks ->
                     Timber.d("AudioDataSource returned ${audioTracks.size} tracks")
+                    val existingTracks = filterExistingTracks(audioTracks)
+
 
                     _state.update { currentState ->
                         currentState.copy(
                             scanning = false,
                             loadingInReScan = false,
-                            trackList = audioTracks.map { track ->
+                            trackList = existingTracks.map { track ->
                                 AudioTrackUI(
                                     id = track.id,
                                     cover = track.cover,
                                     title = track.title,
                                     artist = track.artist,
-                                    path = Uri.parse(track.path),
+                                    path = track.path.toUri(),
                                     totalDurationMs = track.totalDuration
                                 )
                             }
@@ -81,7 +82,29 @@ class VibePlayerViewModel(
             }
         }
     }
+    private suspend fun filterExistingTracks(tracks: List<TrackEntity>): List<TrackEntity> {
+        return withContext(Dispatchers.IO) {
+            val existingTracks = mutableListOf<TrackEntity>()
+            val tracksToDelete = mutableListOf<Long>()
 
+            tracks.forEach { track ->
+                val exists = contentUriChecker.checkContentUriExists(track.path)
+                if (exists) {
+                    existingTracks.add(track)
+                } else {
+                    tracksToDelete.add(track.id)
+                }
+            }
+
+            // Delete non-existent tracks from database
+            if (tracksToDelete.isNotEmpty()) {
+                trackDao.deleteTracksfromIds(ids = tracksToDelete)
+                Timber.d("Deleted ${tracksToDelete.size} tracks that no longer exist")
+            }
+
+            existingTracks
+        }
+    }
     private suspend fun loadAudioTracksWithFilter(duration: Int? = null, size: Int? = null) {
         try {
             val scanCompleted = audioDataSource.scanAndSave(duration, size)
@@ -179,10 +202,11 @@ class VibePlayerViewModel(
 
     private fun onScanButton() {
         viewModelScope.launch {
+
             _state.update {
                 it.copy(loadingInReScan = true)
             }
-
+            delay(2000)
             loadAudioTracksWithFilter(duration, size)
 
 

@@ -1,6 +1,7 @@
 package com.vs.vibeplayer.main.presentation.VibePlayer.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -42,13 +43,15 @@ import com.vs.vibeplayer.main.presentation.model.AudioTrackUI
 fun AudioList(
     modifier: Modifier = Modifier,
     audioList : List<AudioTrackUI>,
+    onTrackClick: (Long) -> Unit
     ) {
     LazyColumn(
         modifier = modifier,
 
     ) {
    items(audioList){
-       AudioListItem(item = it)
+       AudioListItem(item = it,
+                     onTrackClick = onTrackClick)
        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp,
            color = SlateGrey
        )
@@ -61,8 +64,11 @@ fun AudioList(
 }
 
 @Composable
-fun AudioListItem(modifier: Modifier = Modifier, item : AudioTrackUI) {
-    Row(modifier = modifier.fillMaxWidth().height(90.dp), verticalAlignment = Alignment.CenterVertically) {
+fun AudioListItem(modifier: Modifier = Modifier, item : AudioTrackUI,
+                  onTrackClick : (Long) -> Unit ) {
+    Row(modifier = modifier.fillMaxWidth().height(90.dp).clickable {
+        onTrackClick(item.id)
+    }, verticalAlignment = Alignment.CenterVertically) {
         AsyncImage(
             modifier = Modifier.size(60.dp).clip(
                 shape = RoundedCornerShape(8.dp),

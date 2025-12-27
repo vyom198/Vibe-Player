@@ -47,13 +47,15 @@ import timber.log.Timber
 @Composable
 fun VibePlayerRoot(
     viewModel: VibePlayerViewModel = koinViewModel(),
-    NavigateToScanScreen : () -> Unit
+    NavigateToScanScreen : () -> Unit,
+    NavigateWithTrackId : (Long) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     VibePlayerScreen(
         state = state,
         onAction = viewModel::onAction,
-        onScanClick = NavigateToScanScreen
+        onScanClick = NavigateToScanScreen,
+        NavigateWithTrackId = NavigateWithTrackId
     )
 }
 
@@ -63,6 +65,7 @@ fun VibePlayerScreen(
     state: VibePlayerState,
     onScanClick : () -> Unit,
     onAction: (VibePlayerAction) -> Unit,
+    NavigateWithTrackId : (Long) -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -136,7 +139,8 @@ fun VibePlayerScreen(
                 }
 
                 else ->{
-                    AudioList(audioList = state.trackList)
+                    AudioList(audioList = state.trackList,
+                             onTrackClick = NavigateWithTrackId)
                     Timber.d("${state.trackList.size}")
                 }
             }
@@ -156,7 +160,8 @@ fun VibePlayerScreen(
 //            VibePlayerTheme {
 //                VibePlayerScreen(
 //                    state = VibePlayerState(),
-//                    onAction = {}
+//                    onAction = {},
+//
 //                )
 //            }
 //        }

@@ -38,13 +38,15 @@ class VibePlayerViewModel(
     private var size by mutableIntStateOf(0)
 
     init {
+
         viewModelScope.launch {
-            Timber.d("trackDao.getTrackCount() = ${trackDao.getTrackCount()}")
-            if (trackDao.getTrackCount() == 0) {
+            if(trackDao.getTrackCount() ==0){
                 loadInitialAudioTracksWithoutFilter()
+            }else{
+                loadInitialAudioTracks()
             }
         }
-        loadInitialAudioTracks()
+
     }
 
     private fun loadInitialAudioTracks() {
@@ -150,13 +152,10 @@ class VibePlayerViewModel(
 
             VibePlayerAction.onScanAgain -> {
                 viewModelScope.launch {
-                    _state.update {
-                        it.copy(scanning = true)
-                    }
-                    loadInitialAudioTracksWithoutFilter()
-                }
 
+                }
             }
+
 
             is VibePlayerAction.onTrackClicked -> {
 
@@ -184,20 +183,16 @@ class VibePlayerViewModel(
     }
 
     private suspend fun loadInitialAudioTracksWithoutFilter() {
-        _state.update {
-            it.copy(scanning = true)
-        }
-        val ScanningComplete = audioDataSource.scanAndSave(duration, size)
-        if (ScanningComplete) {
+
             _state.update {
-                it.copy(
-                    scanning = false,
-
-                    )
-
+                it.copy(scanning = true)
+            }
+           val scanned =  audioDataSource.scanAndSave(duration, size)
+            if(scanned){
+                loadInitialAudioTracks()
             }
 
-        }
+
     }
 
     private fun onScanButton() {

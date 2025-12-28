@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
@@ -42,12 +43,13 @@ import com.vs.vibeplayer.main.presentation.model.AudioTrackUI
 @Composable
 fun AudioList(
     modifier: Modifier = Modifier,
+    state: LazyListState,
     audioList : List<AudioTrackUI>,
     onTrackClick: (Long) -> Unit
     ) {
     LazyColumn(
         modifier = modifier,
-
+        state = state
     ) {
    items(audioList){
        AudioListItem(item = it,

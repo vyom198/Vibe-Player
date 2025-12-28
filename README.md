@@ -22,3 +22,10 @@ A modern, elegant music player for Android that plays local audio files with a b
 -  **MediaMetadataRetriever** - Extract audio metadata
 -  **MVVM Architecture** - Clean separation of concerns
 -  **Coroutines & Flow** - Asynchronous programming
+  
+## Demo
+
+
+https://github.com/user-attachments/assets/6fa376f6-fc09-40bf-8f6d-15af04efdccc
+
+

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +26,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -41,6 +46,8 @@ import com.vs.vibeplayer.core.theme.hover
 import com.vs.vibeplayer.main.presentation.VibePlayer.components.AudioList
 import com.vs.vibeplayer.main.presentation.VibePlayer.components.EmptyScreen
 import com.vs.vibeplayer.main.presentation.components.Loader
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
@@ -67,16 +74,17 @@ fun VibePlayerScreen(
     onAction: (VibePlayerAction) -> Unit,
     NavigateWithTrackId : (Long) -> Unit
 ) {
+    val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
          TopAppBar(
-             title = {
-                 Row(
-                     modifier = Modifier.fillMaxWidth(),
-                     verticalAlignment = Alignment.CenterVertically,
 
-                 ) {
+             title = {
+                 Row(modifier = Modifier.wrapContentSize(),
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.Start){
 
                      Icon(
                          painter = painterResource(R.drawable.vlogo),
@@ -86,8 +94,8 @@ fun VibePlayerScreen(
                      Text(text = stringResource(R.string.vibe_player),
                          style =  MaterialTheme.typography.bodyLargeMedium,
                          color =  MaterialTheme.colorScheme.accent)
-
                  }
+
 
              },
              actions = {
@@ -108,7 +116,33 @@ fun VibePlayerScreen(
 
          )
 
-        }
+        },
+        floatingActionButton = {
+            IconButton(
+                onClick = {
+                    if(state.trackList.isNotEmpty()){
+                        coroutineScope.launch {
+                            lazyListState.animateScrollToItem(0)
+                        }
+                    }
+
+                },
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.arrow_up),
+                    contentDescription = "scrolltoUp",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        },
+
     ) { paddingValues ->
         Column(modifier = Modifier
             .padding(paddingValues)
@@ -140,6 +174,7 @@ fun VibePlayerScreen(
 
                 else ->{
                     AudioList(audioList = state.trackList,
+                              state = lazyListState,
                              onTrackClick = NavigateWithTrackId)
                     Timber.d("${state.trackList.size}")
                 }
@@ -161,7 +196,8 @@ fun VibePlayerScreen(
 //                VibePlayerScreen(
 //                    state = VibePlayerState(),
 //                    onAction = {},
-//
+//                    onScanClick = {},
+//                    NavigateWithTrackId = {}
 //                )
 //            }
 //        }

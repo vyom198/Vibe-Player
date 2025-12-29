@@ -13,5 +13,5 @@ sealed interface NavigationRoute {
     @Serializable
     data object ScanScreen
     @Serializable
-    data class PlayerScreen(val trackId: Long)
+    data class PlayerScreen(val trackId: Long? =null)
 }

@@ -21,7 +21,7 @@ class PlayerViewModel(
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
-    private val trackId = savedStateHandle.get<Long>("trackId")
+    private val trackId = savedStateHandle.get<Long?>("trackId")
     private val _playlist = MutableStateFlow<List<TrackEntity>>(emptyList())
     private val _state = MutableStateFlow(PlayerUIState())
     val state = _state
@@ -42,7 +42,6 @@ class PlayerViewModel(
         viewModelScope.launch {
             try {
                 val clickedSong = trackDao.getTrackById(trackId)
-                Timber.d("clickedSong is $clickedSong")
                 if (clickedSong != null) {
                     trackDao.observeTracks().collect { playlist ->
                         _playlist.value = playlist

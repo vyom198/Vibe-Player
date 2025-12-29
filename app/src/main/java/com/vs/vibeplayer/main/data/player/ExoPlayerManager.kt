@@ -31,23 +31,18 @@ class ExoPlayerManager(
     override val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
     private var positionUpdateJob: Job? = null
     private var originalPlaylist: List<TrackEntity> = emptyList()
-    private var shuffledPlaylist: List<TrackEntity> = emptyList()
-    private var isShuffleEnabled = false
 
     private var currentIndex: Int = 0
 
     override fun initialize(
-        clickedSong: TrackEntity,
+        clickedSong: TrackEntity?,
         playlist: List<TrackEntity>
     ) {
         release()
         this.originalPlaylist = playlist
-        this.isShuffleEnabled = false
-       // this.shuffledPlaylist = playlist.shuffled()
-        currentIndex = playlist.indexOfFirst { it.id == clickedSong.id }
+        currentIndex = originalPlaylist.indexOfFirst { it.id == clickedSong?.id }
             .takeIf { it != -1 } ?: 0
 
-        // Create ExoPlayer
         player = ExoPlayer.Builder(context)
             .setHandleAudioBecomingNoisy(true)
             .build()
@@ -55,12 +50,12 @@ class ExoPlayerManager(
                 addListener(playerListener)
             }
 
-        // Load and play the clicked song
+
         loadAndPlayCurrentSong()
     }
 
     override fun seekTo(position: Long) {
-        // CORRECTED: Seek within current song, not to index
+
         player?.seekTo(position)
 
         val currentDuration = player?.duration ?: 0L
@@ -73,14 +68,14 @@ class ExoPlayerManager(
     }
 
     override fun play() {
-       player?.play()
+        player?.play()
         _playerState.value = _playerState.value.copy(
             isPlaying = true
         )
     }
 
     override fun pause() {
-         player?.pause()
+        player?.pause()
         _playerState.value = _playerState.value.copy(
             isPlaying = false
         )
@@ -96,30 +91,28 @@ class ExoPlayerManager(
         player = null
         originalPlaylist = emptyList()
         currentIndex = 0
-        isShuffleEnabled = false
         _playerState.value = PlayerState()
         originalPlaylist = emptyList()
-        shuffledPlaylist = emptyList()
+
     }
 
     override fun next() {
-        if (currentIndex < getCurrentPlaylist().size - 1) {
-            currentIndex++
-
+        val player = this.player ?: return
+        if (player.hasNextMediaItem()) {
+            player.seekToNext()
         }else{
-            currentIndex = 0
+            player.seekTo(0, 0L)
         }
-        player?.seekTo(currentIndex, 0L)
         updateCurrentSongState()
     }
 
     override fun previous() {
-        if (currentIndex > 0) {
-            currentIndex--
-        }else{
-            currentIndex = getCurrentPlaylist().size -1
+        val player = this.player ?: return
+        if (player.hasPreviousMediaItem()) {
+            player.seekToPrevious()
+        } else {
+            player.seekTo(0, 0L)
         }
-        player?.seekTo(currentIndex, 0L)
         updateCurrentSongState()
     }
 
@@ -149,38 +142,24 @@ class ExoPlayerManager(
 
     }
 
+
     override fun shuffleSong() {
-        isShuffleEnabled = !isShuffleEnabled
-        val currentSong = _playerState.value.currentSong
+        val player = this.player ?: return
 
-        if (isShuffleEnabled) {
-            shuffledPlaylist = originalPlaylist.shuffled()
-            if (currentSong != null) {
-                val newIndex = shuffledPlaylist.indexOfFirst { it.id == currentSong.id }
-                if (newIndex != -1) {
-                    currentIndex = newIndex
-                } else {
-                    currentIndex = 0
-                }
-            }
-        } else {
-            if (currentSong != null) {
-                val originalIndex = originalPlaylist.indexOfFirst { it.id == currentSong.id }
-                if (originalIndex != -1) {
-                    currentIndex = originalIndex
-                }
-            }
-        }
+        // Toggle shuffle mode
+        player.shuffleModeEnabled = !player.shuffleModeEnabled
 
-        // Update UI state
+        // Update state
         _playerState.value = _playerState.value.copy(
-            isShuffleEnabled = isShuffleEnabled
+            isShuffleEnabled = player.shuffleModeEnabled
         )
-        Timber.d("Shuffle ${if (isShuffleEnabled) "enabled" else "disabled"}")
+
+        Timber.d("Shuffle ${if (player.shuffleModeEnabled) "ENABLED" else "DISABLED"}")
     }
-    private fun getCurrentPlaylist(): List<TrackEntity> {
-        return if (isShuffleEnabled) shuffledPlaylist else originalPlaylist
-    }
+
+
+
+
     private fun startPositionUpdates() {
         stopPositionUpdates() // Clear previous
 
@@ -215,7 +194,7 @@ class ExoPlayerManager(
         positionUpdateJob = null
     }
     private fun loadAndPlayCurrentSong() {
-        val currentPlaylist = getCurrentPlaylist()
+        val currentPlaylist = originalPlaylist
         val currentSong = currentPlaylist.getOrNull(currentIndex) ?: return
         val player = this.player ?: return
 
@@ -236,28 +215,27 @@ class ExoPlayerManager(
         player.setMediaItems(mediaItems)
         player.prepare()
         player.seekTo(currentIndex,0)
-        Timber.d("currentSong is $currentSong")
         // Update state
         _playerState.value = _playerState.value.copy(
             currentSong = currentSong,
             currentPosition = 0L,
+            isShuffleEnabled = player.shuffleModeEnabled,
             currentPositionFraction = 0f,
             duration = 0L,  // Will be updated when STATE_READY
-            canGoNext = currentIndex < getCurrentPlaylist().size - 1,
-            canGoPrevious = currentIndex > 0,
+            canGoNext = player.hasNextMediaItem(),
+            canGoPrevious = player.hasPreviousMediaItem(),
             isPlaying = false  // Will be set to true when STATE_READY
         )
     }
     private fun updateCurrentSongState() {
-        val currentPlaylist = getCurrentPlaylist()
-        val currentSong = currentPlaylist.getOrNull(currentIndex)
+        val player = this.player ?: return
+        val currentMediaItemIndex = player.currentMediaItemIndex
+        val currentSong = originalPlaylist.getOrNull(currentMediaItemIndex)
         if (currentSong != null) {
             _playerState.value = _playerState.value.copy(
                 currentSong = currentSong,
-                currentPosition = 0L,
-                currentPositionFraction = 0f,
-                canGoNext = currentIndex < currentPlaylist.size - 1,
-                canGoPrevious = currentIndex > 0
+                canGoNext = player.hasNextMediaItem(),
+                canGoPrevious = player.hasPreviousMediaItem()
             )
         }
     }
@@ -280,6 +258,7 @@ class ExoPlayerManager(
                     stopPositionUpdates()
                     when (_playerState.value.repeatType) {
                         RepeatType.REPEAT_ONE -> {
+                            val currentIndex = player?.currentMediaItemIndex ?: 0
                             player?.seekTo(currentIndex,0)
                             player?.play()
 
@@ -291,11 +270,11 @@ class ExoPlayerManager(
                         }
 
                         RepeatType.OFF -> {
-                            if (currentIndex < getCurrentPlaylist().size - 1) {
-                                next()
-                            } else {
-                                _playerState.value = _playerState.value.copy(isPlaying = false)
-                            }
+//                            if (currentIndex < originalPlaylist.size - 1) {
+//                                next()
+//                            } else {
+//                                _playerState.value = _playerState.value.copy(isPlaying = false)
+//                            }
                         }
                     }
 
@@ -310,7 +289,6 @@ class ExoPlayerManager(
                     // ExoPlayer auto-advanced to next song (e.g., in REPEAT_ALL mode)
                     val newIndex = player?.currentMediaItemIndex ?: currentIndex
                     if (newIndex != -1 && newIndex != currentIndex) {
-                        Timber.d("Auto-advanced to index: $newIndex")
                         currentIndex = newIndex
                         updateCurrentSongState()
                     }
@@ -319,19 +297,25 @@ class ExoPlayerManager(
                     // User clicked next/previous or seeked to different song
                     val newIndex = player?.currentMediaItemIndex ?: currentIndex
                     if (newIndex != -1 && newIndex != currentIndex) {
-                        Timber.d("Seeked to index: $newIndex")
                         currentIndex = newIndex
                         updateCurrentSongState()
                     }
                 }
             }
         }
+        override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+            // Update state when shuffle mode changes
+            _playerState.value = _playerState.value.copy(
+                isShuffleEnabled = shuffleModeEnabled
+            )
+            Timber.d("ExoPlayer shuffle mode changed: $shuffleModeEnabled")
+        }
         override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
-            // Update song info if needed
-            val currentSong = getCurrentPlaylist().getOrNull(currentIndex)
+            val currentSong = originalPlaylist.getOrNull(currentIndex)
             if (currentSong != null) {
                 _playerState.value = _playerState.value.copy(
-                    currentSong = currentSong
+                    currentSong = currentSong,
+
                 )
             }
         }

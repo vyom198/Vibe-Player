@@ -96,7 +96,6 @@ fun PlayerScreen(
     )
     { paddingValues ->
 
-        Timber.d("${state.currentSong}")
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -110,8 +109,8 @@ fun PlayerScreen(
             Spacer(modifier = Modifier.height(70.dp))
                 AsyncImage(
                     model = state.currentSong?.cover,
-                    error = painterResource(id = R.drawable.item_placeholder),
-                    placeholder = painterResource(id = R.drawable.item_placeholder),
+                    error = painterResource(id = R.drawable.song_img),
+                    placeholder = painterResource(id = R.drawable.song_img),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -139,7 +138,6 @@ fun PlayerScreen(
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 10.dp, end = 10.dp),
-               // horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom
             ) {
                 Spacer(modifier = Modifier.height(19.dp))

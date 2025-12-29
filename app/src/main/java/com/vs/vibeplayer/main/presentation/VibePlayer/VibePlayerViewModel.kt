@@ -19,6 +19,7 @@ import timber.log.Timber
 import androidx.core.net.toUri
 import com.vs.vibeplayer.core.database.track.TrackEntity
 import com.vs.vibeplayer.main.data.audio.ContentUriChecker
+import com.vs.vibeplayer.main.domain.player.PlayerManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -27,7 +28,8 @@ import kotlinx.coroutines.withContext
 class VibePlayerViewModel(
     private val audioDataSource: AudioDataSource,
     private val  trackDao: TrackDao,
-    private val contentUriChecker: ContentUriChecker
+    private val contentUriChecker: ContentUriChecker,
+    private val playerManager: PlayerManager
 ) : ViewModel() {
     private val eventChannel = Channel<VibePlayerEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -36,13 +38,13 @@ class VibePlayerViewModel(
 
     private var duration by mutableIntStateOf(0)
     private var size by mutableIntStateOf(0)
+    private var currentPlaylist: List<TrackEntity> = emptyList()
 
     init {
-
         viewModelScope.launch {
-            if(trackDao.getTrackCount() ==0){
+            if (trackDao.getTrackCount() == 0) {
                 loadInitialAudioTracksWithoutFilter()
-            }else{
+            } else {
                 loadInitialAudioTracks()
             }
         }
@@ -56,7 +58,7 @@ class VibePlayerViewModel(
                 trackDao.observeTracks().collect { audioTracks ->
                     Timber.d("AudioDataSource returned ${audioTracks.size} tracks")
                     val existingTracks = filterExistingTracks(audioTracks)
-
+                    currentPlaylist = existingTracks
 
                     _state.update { currentState ->
                         currentState.copy(
@@ -84,6 +86,7 @@ class VibePlayerViewModel(
             }
         }
     }
+
     private suspend fun filterExistingTracks(tracks: List<TrackEntity>): List<TrackEntity> {
         return withContext(Dispatchers.IO) {
             val existingTracks = mutableListOf<TrackEntity>()
@@ -107,6 +110,7 @@ class VibePlayerViewModel(
             existingTracks
         }
     }
+
     private suspend fun loadAudioTracksWithFilter(duration: Int? = null, size: Int? = null) {
         try {
             val scanCompleted = audioDataSource.scanAndSave(duration, size)
@@ -147,7 +151,6 @@ class VibePlayerViewModel(
             VibePlayerAction.onScanButton -> onScanButton()
 
 
-
             VibePlayerAction.onScanAgain -> {
                 viewModelScope.launch {
 
@@ -173,8 +176,25 @@ class VibePlayerViewModel(
                 }
                 size = action.kb
             }
+
+            VibePlayerAction.onPlayClick -> {
+                viewModelScope.launch {
+                    playerManager.initialize(playlist = currentPlaylist)
+                }
+
+            }
+
+        VibePlayerAction.shuffleClick -> {
+            viewModelScope.launch {
+                playerManager.initialize(playlist = currentPlaylist)
+                playerManager.shuffleSong()
+            }
+
         }
     }
+}
+
+
 
     private suspend fun loadInitialAudioTracksWithoutFilter() {
 

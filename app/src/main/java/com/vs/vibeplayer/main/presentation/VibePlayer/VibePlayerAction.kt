@@ -12,5 +12,7 @@ sealed interface VibePlayerAction {
 
     data class onSizeSelect(val kb: Int) : VibePlayerAction
 
+    data object  onPlayClick  : VibePlayerAction
+    data object  shuffleClick  : VibePlayerAction
 
 }

@@ -146,9 +146,7 @@ class VibePlayerViewModel(
         when (action) {
             VibePlayerAction.onScanButton -> onScanButton()
 
-            VibePlayerAction.onFabClicked -> {
 
-            }
 
             VibePlayerAction.onScanAgain -> {
                 viewModelScope.launch {
@@ -156,10 +154,6 @@ class VibePlayerViewModel(
                 }
             }
 
-
-            is VibePlayerAction.onTrackClicked -> {
-
-            }
 
             is VibePlayerAction.onDurationSelect -> {
                 _state.update {

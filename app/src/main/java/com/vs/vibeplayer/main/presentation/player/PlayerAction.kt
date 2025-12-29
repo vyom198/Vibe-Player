@@ -6,4 +6,10 @@ sealed interface PlayerAction {
     object Next : PlayerAction
     object Previous : PlayerAction
     object BackPressed : PlayerAction
+
+    object ShuffleClick : PlayerAction
+
+   object OnRepeatClick: PlayerAction
+
+    data class OnSeek(val position : Long): PlayerAction
 }

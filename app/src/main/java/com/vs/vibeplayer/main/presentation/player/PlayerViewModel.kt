@@ -70,7 +70,10 @@ class PlayerViewModel(
                     currentPosition = playerState.currentPosition,
                     duration = playerState.duration,
                     canGoNext = playerState.canGoNext,
-                    canGoPrevious = playerState.canGoPrevious
+                    canGoPrevious = playerState.canGoPrevious,
+                    repeatType = playerState.repeatType,
+                    isShuffleEnabled = playerState.isShuffleEnabled,
+                    currentPositionFraction = playerState.currentPositionFraction
                 )
             }
         }
@@ -85,6 +88,9 @@ class PlayerViewModel(
             }
             PlayerAction.Previous -> playerManager.previous()
             PlayerAction.Stop -> playerManager.stop()
+            PlayerAction.OnRepeatClick -> playerManager.onRepeatClick()
+            PlayerAction.ShuffleClick -> playerManager.shuffleSong()
+            is PlayerAction.OnSeek ->  playerManager.seekTo(action.position)
         }
     }
     private fun handleBackPressed() {

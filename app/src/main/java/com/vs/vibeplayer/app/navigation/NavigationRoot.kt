@@ -46,7 +46,23 @@ fun NavigationRoot(
                         launchSingleTop = true
                     }
 
+                },
+                onSearchClick = {
+
+                },
+                onShuffleClick = {
+                    navController.navigate(NavigationRoute.PlayerScreen()){
+                        launchSingleTop = true
+                    }
+                },
+                onPlayClick = {
+                    navController.navigate(NavigationRoute.PlayerScreen()){
+                        launchSingleTop = true
+                    }
                 }
+
+
+
 
             )
         }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -55,14 +56,20 @@ import timber.log.Timber
 fun VibePlayerRoot(
     viewModel: VibePlayerViewModel = koinViewModel(),
     NavigateToScanScreen : () -> Unit,
-    NavigateWithTrackId : (Long) -> Unit
+    NavigateWithTrackId : (Long) -> Unit,
+    onSearchClick: () -> Unit,
+    onShuffleClick: () -> Unit,
+    onPlayClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     VibePlayerScreen(
         state = state,
         onAction = viewModel::onAction,
         onScanClick = NavigateToScanScreen,
-        NavigateWithTrackId = NavigateWithTrackId
+        NavigateWithTrackId = NavigateWithTrackId,
+        onSearchClick = onSearchClick,
+        onPlayClick = onPlayClick,
+        onShuffleClick = onShuffleClick
     )
 }
 
@@ -72,7 +79,10 @@ fun VibePlayerScreen(
     state: VibePlayerState,
     onScanClick : () -> Unit,
     onAction: (VibePlayerAction) -> Unit,
-    NavigateWithTrackId : (Long) -> Unit
+    NavigateWithTrackId : (Long) -> Unit,
+    onSearchClick : () -> Unit,
+    onPlayClick : () -> Unit,
+    onShuffleClick : () -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -100,8 +110,7 @@ fun VibePlayerScreen(
              },
              actions = {
                  IconButton(onClick = onScanClick,
-                     modifier = Modifier
-                         .padding(end = 4.dp)
+                     modifier = Modifier.size(44.dp)
                          .background(
                              color = MaterialTheme.colorScheme.hover, shape = CircleShape
                          ))
@@ -111,6 +120,21 @@ fun VibePlayerScreen(
                          contentDescription = null,
 
                      )
+                 }
+                 Spacer(modifier = Modifier.width(3.dp))
+                 IconButton(onClick = onSearchClick,
+                     modifier = Modifier.size(44.dp)
+                         .padding(8.dp)
+                         .background(
+                             color = MaterialTheme.colorScheme.hover, shape = CircleShape
+                         ))
+                 {
+                     Icon(
+
+                         painter = painterResource(R.drawable.search),
+                         contentDescription = null,
+
+                         )
                  }
              }
 
@@ -175,8 +199,17 @@ fun VibePlayerScreen(
                 else ->{
                     AudioList(audioList = state.trackList,
                               state = lazyListState,
-                             onTrackClick = NavigateWithTrackId)
-                    Timber.d("${state.trackList.size}")
+                             onTrackClick = NavigateWithTrackId,
+                             onPlayClick = {
+                                 onAction(VibePlayerAction.onPlayClick)
+                                 onPlayClick.invoke()
+                             },
+                            onShuffleClick = {
+                                onAction(VibePlayerAction.shuffleClick)
+                                onShuffleClick.invoke()
+                            }
+                        )
+
                 }
             }
 
@@ -197,7 +230,8 @@ fun VibePlayerScreen(
 //                    state = VibePlayerState(),
 //                    onAction = {},
 //                    onScanClick = {},
-//                    NavigateWithTrackId = {}
+//                    NavigateWithTrackId = {},
+//                    onSearchClick = {}
 //                )
 //            }
 //        }

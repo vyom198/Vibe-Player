@@ -142,7 +142,7 @@ fun PlayerScreen(
             ) {
                 Spacer(modifier = Modifier.height(19.dp))
 
-                var sliderValue = remember(state.currentPositionFraction,state.currentPosition){
+                var sliderValue = remember(state.currentPosition){
                     derivedStateOf {
                         state.currentPositionFraction
 
@@ -155,10 +155,10 @@ fun PlayerScreen(
                     value = sliderValue,
                     modifier = Modifier.fillMaxWidth(),
                     onValueChange = {
-                        sliderValue = it
+                       sliderValue = it
                     },
                     onValueChangeFinished = {
-                        onAction(PlayerAction.OnSeek((sliderValue * state.duration).toLong()))
+                        onAction(PlayerAction.OnSeek((sliderValue* state.duration).toLong()))
 
                     },
                   track = { sliderState ->
@@ -190,15 +190,20 @@ fun PlayerScreen(
                       }
                   },
                     thumb = {
-
-                         Text(text = "${state.currentDuration} / ${state.totalDuration}",
-                               style = MaterialTheme.typography.bodySmallRegular,
-                               color = MaterialTheme.colorScheme.surface,
-                               modifier = Modifier.background(
-                                   color = MaterialTheme.colorScheme.onPrimary,
-                                   shape = RoundedCornerShape(6.dp)
-                                   )
-                         )
+                        Box(
+                            modifier = Modifier
+                                .padding(bottom = 16.dp) // Space between thumb and track
+                        ) {
+                            Text(
+                                text = "${state.currentDuration} / ${state.totalDuration}",
+                                style = MaterialTheme.typography.bodySmallRegular,
+                                color = MaterialTheme.colorScheme.surface,
+                                modifier = Modifier.background(
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    shape = RoundedCornerShape(6.dp)
+                                )
+                            )
+                        }
                     },
                     valueRange = 0f..1f
 
@@ -224,7 +229,7 @@ fun PlayerScreen(
 
 
 }
-//
+
 //@Preview
 //@Composable
 //private fun PlayerScreenPrev() {
@@ -237,4 +242,4 @@ fun PlayerScreen(
 //    }
 //
 //}
-//
+

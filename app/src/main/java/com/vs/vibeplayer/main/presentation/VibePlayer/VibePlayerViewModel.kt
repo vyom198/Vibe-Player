@@ -41,6 +41,11 @@ class VibePlayerViewModel(
     private var currentPlaylist: List<TrackEntity> = emptyList()
 
     init {
+        _state.update {
+            it.copy(
+                isPlaying = playerManager.isPlayerEnabled()
+            )
+        }
         viewModelScope.launch {
             if (trackDao.getTrackCount() == 0) {
                 loadInitialAudioTracksWithoutFilter()

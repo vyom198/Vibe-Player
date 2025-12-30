@@ -10,6 +10,8 @@
     <string name="scan_again">Scan Again</string>
     <string name="scanning_your_device_for_music">Scanning your device for music...</string>
     <string name="scan_screen">Scan Screen\n</string>
+    <string name="search">Search</string>
+    <string name="cancel">Cancel</string>
 
 </resources>
 

@@ -8,8 +8,10 @@ import com.vs.vibeplayer.main.data.player.ExoPlayerManager
 import com.vs.vibeplayer.main.domain.audio.AudioDataSource
 import com.vs.vibeplayer.main.domain.player.PlayerManager
 import com.vs.vibeplayer.main.presentation.VibePlayer.VibePlayerViewModel
+import com.vs.vibeplayer.main.presentation.miniplayer.MiniPlayerViewModel
 import com.vs.vibeplayer.main.presentation.permission.PermissionViewModel
 import com.vs.vibeplayer.main.presentation.player.PlayerViewModel
+import com.vs.vibeplayer.main.presentation.search.SearchViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.compose.getKoin
 import org.koin.core.module.dsl.singleOf
@@ -32,5 +34,7 @@ val mainModule = module {
     viewModelOf(::PermissionViewModel)
     viewModelOf(::VibePlayerViewModel)
     viewModelOf(::PlayerViewModel)
+    viewModelOf(::MiniPlayerViewModel)
+    viewModelOf(::SearchViewModel)
 
 }

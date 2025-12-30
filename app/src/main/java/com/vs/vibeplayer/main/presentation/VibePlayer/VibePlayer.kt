@@ -47,6 +47,8 @@ import com.vs.vibeplayer.core.theme.hover
 import com.vs.vibeplayer.main.presentation.VibePlayer.components.AudioList
 import com.vs.vibeplayer.main.presentation.VibePlayer.components.EmptyScreen
 import com.vs.vibeplayer.main.presentation.components.Loader
+import com.vs.vibeplayer.main.presentation.miniplayer.MiniPlayerRoot
+import com.vs.vibeplayer.main.presentation.miniplayer.MiniPlayerScreen
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -59,7 +61,8 @@ fun VibePlayerRoot(
     NavigateWithTrackId : (Long) -> Unit,
     onSearchClick: () -> Unit,
     onShuffleClick: () -> Unit,
-    onPlayClick: () -> Unit
+    onPlayClick: () -> Unit,
+    onMiniPlayerClick : () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     VibePlayerScreen(
@@ -69,7 +72,8 @@ fun VibePlayerRoot(
         NavigateWithTrackId = NavigateWithTrackId,
         onSearchClick = onSearchClick,
         onPlayClick = onPlayClick,
-        onShuffleClick = onShuffleClick
+        onShuffleClick = onShuffleClick,
+        onMiniPlayerClick = onMiniPlayerClick
     )
 }
 
@@ -82,7 +86,8 @@ fun VibePlayerScreen(
     NavigateWithTrackId : (Long) -> Unit,
     onSearchClick : () -> Unit,
     onPlayClick : () -> Unit,
-    onShuffleClick : () -> Unit
+    onShuffleClick : () -> Unit,
+    onMiniPlayerClick: () -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -90,27 +95,24 @@ fun VibePlayerScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
          TopAppBar(
-
+            modifier = Modifier.padding(end = 2.dp, start = 2.dp),
              title = {
-                 Row(modifier = Modifier.wrapContentSize(),
-                      verticalAlignment = Alignment.CenterVertically,
-                      horizontalArrangement = Arrangement.Start){
+                 Text(text = stringResource(R.string.vibe_player),
+                     style =  MaterialTheme.typography.bodyLargeMedium,
+                     color =  MaterialTheme.colorScheme.accent)
 
-                     Icon(
-                         painter = painterResource(R.drawable.vlogo),
-                         contentDescription = null,
-                         tint = MaterialTheme.colorScheme.accent
-                     )
-                     Text(text = stringResource(R.string.vibe_player),
-                         style =  MaterialTheme.typography.bodyLargeMedium,
-                         color =  MaterialTheme.colorScheme.accent)
-                 }
-
-
+             },
+             navigationIcon = {
+                 Icon(
+                     painter = painterResource(R.drawable.logo_small),
+                     contentDescription = null,
+                     tint = MaterialTheme.colorScheme.accent
+                 )
              },
              actions = {
                  IconButton(onClick = onScanClick,
-                     modifier = Modifier.size(44.dp)
+                     modifier = Modifier
+                         .size(36.dp).padding(end = 14.dp)
                          .background(
                              color = MaterialTheme.colorScheme.hover, shape = CircleShape
                          ))
@@ -121,16 +123,17 @@ fun VibePlayerScreen(
 
                      )
                  }
-                 Spacer(modifier = Modifier.width(3.dp))
+                 Spacer(modifier = Modifier.width(20.dp))
                  IconButton(onClick = onSearchClick,
-                     modifier = Modifier.size(44.dp)
-                         .padding(8.dp)
+                     modifier = Modifier
+                         .size(36.dp)
+                         .padding(end = 16.dp)
                          .background(
                              color = MaterialTheme.colorScheme.hover, shape = CircleShape
                          ))
                  {
                      Icon(
-
+                         modifier = Modifier.size(16.dp),
                          painter = painterResource(R.drawable.search),
                          contentDescription = null,
 
@@ -166,6 +169,12 @@ fun VibePlayerScreen(
                 )
             }
         },
+        bottomBar = {
+
+            if(state.isPlaying) {
+                MiniPlayerRoot(onMiniPlayerClick =onMiniPlayerClick)
+            }
+        }
 
     ) { paddingValues ->
         Column(modifier = Modifier
@@ -222,16 +231,19 @@ fun VibePlayerScreen(
 
 }
 
-//        @Preview
-//        @Composable
-//        private fun Preview() {
-//            VibePlayerTheme {
-//                VibePlayerScreen(
-//                    state = VibePlayerState(),
-//                    onAction = {},
-//                    onScanClick = {},
-//                    NavigateWithTrackId = {},
-//                    onSearchClick = {}
-//                )
-//            }
-//        }
+//@Preview
+//@Composable
+//private fun Preview() {
+//    VibePlayerTheme {
+//        VibePlayerScreen(
+//            state = VibePlayerState(),
+//            onAction = {},
+//            onScanClick = {},
+//            NavigateWithTrackId = {},
+//            onSearchClick = {},
+//            onPlayClick = {},
+//            onShuffleClick = {},
+//            onMiniPlayerClick = {}
+//        )
+//    }
+//}

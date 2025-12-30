@@ -93,7 +93,7 @@ class PlayerViewModel(
         }
     }
     private fun handleBackPressed() {
-        playerManager.stop()
+        //playerManager.stop()
     }
 
     override fun onCleared() {

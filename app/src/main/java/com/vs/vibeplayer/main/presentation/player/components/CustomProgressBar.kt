@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -17,21 +18,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.vs.vibeplayer.core.theme.DarkBlueGrey28
+import com.vs.vibeplayer.core.theme.DarkSlateGrey
+import com.vs.vibeplayer.core.theme.SlateGrey
 import com.vs.vibeplayer.core.theme.VibePlayerTheme
 
 @Composable
 fun LineProgressBar(
     progress: Float,
     modifier: Modifier = Modifier,
-    height: Dp = 6.dp,
+    height: Dp = 5.dp,
     progressColor: Color = MaterialTheme.colorScheme.onPrimary,
-    trackColor: Color = DarkBlueGrey28
+    trackColor: Color = SlateGrey
 ) {
         Canvas(modifier = modifier.fillMaxWidth().height(height)) {
             // Draw track (full width rectangle)
             drawRoundRect(
                 color = trackColor,
                 topLeft = Offset.Zero,
+                cornerRadius = CornerRadius(5L),
                 size = Size(size.width, size.height)
             )
 
@@ -39,6 +43,7 @@ fun LineProgressBar(
             if (progress > 0) {
                 drawRoundRect(
                     color = progressColor,
+                    cornerRadius = CornerRadius(5L),
                     topLeft = Offset.Zero,
                     size = Size(size.width * progress, size.height)
                 )

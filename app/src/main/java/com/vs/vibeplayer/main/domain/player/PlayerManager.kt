@@ -25,5 +25,6 @@ interface PlayerManager {
 
 
 
+    fun isPlayerEnabled(): Boolean
 }
 

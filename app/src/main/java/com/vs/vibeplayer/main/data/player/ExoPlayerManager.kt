@@ -157,7 +157,10 @@ class ExoPlayerManager(
         Timber.d("Shuffle ${if (player.shuffleModeEnabled) "ENABLED" else "DISABLED"}")
     }
 
-
+    override fun isPlayerEnabled(): Boolean {
+        val player = this.player ?: return false
+        return true
+    }
 
 
     private fun startPositionUpdates() {
@@ -229,12 +232,18 @@ class ExoPlayerManager(
     }
     private fun updateCurrentSongState() {
         val player = this.player ?: return
+        val currentDuration = player.duration
+        val currentPosition = player.currentPosition
         val currentMediaItemIndex = player.currentMediaItemIndex
         val currentSong = originalPlaylist.getOrNull(currentMediaItemIndex)
         if (currentSong != null) {
             _playerState.value = _playerState.value.copy(
                 currentSong = currentSong,
                 canGoNext = player.hasNextMediaItem(),
+                currentPosition =currentPosition,
+                currentPositionFraction = if (currentDuration > 0) {
+                    currentPosition.toFloat() / currentDuration.toFloat()
+                } else 0f,
                 canGoPrevious = player.hasPreviousMediaItem()
             )
         }
@@ -247,6 +256,7 @@ class ExoPlayerManager(
                     player?.play()
                     _playerState.value = _playerState.value.copy(
                         currentPositionFraction = 0f,
+                        currentPosition = 0L,
                         duration = player?.duration ?: 0L,
                         isPlaying = true
                     )
@@ -270,11 +280,7 @@ class ExoPlayerManager(
                         }
 
                         RepeatType.OFF -> {
-//                            if (currentIndex < originalPlaylist.size - 1) {
-//                                next()
-//                            } else {
-//                                _playerState.value = _playerState.value.copy(isPlaying = false)
-//                            }
+
                         }
                     }
 

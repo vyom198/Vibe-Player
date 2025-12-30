@@ -9,4 +9,5 @@ data class VibePlayerState(
     val loadingInReScan : Boolean = false,
     val durationValue : Int ? = null,
     val sizeValue : Int ? = null,
+    val isPlaying : Boolean = false
     )

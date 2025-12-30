@@ -3,12 +3,14 @@ package com.vs.vibeplayer.main.presentation.player
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -142,72 +144,78 @@ fun PlayerScreen(
             ) {
                 Spacer(modifier = Modifier.height(19.dp))
 
-                var sliderValue = remember(state.currentPosition){
+                var sliderValue = remember(state.currentPosition) {
                     derivedStateOf {
                         state.currentPositionFraction
 
                     }.value
                 }
+                val progressFraction =
+                    if (state.duration > 0) state.currentPosition.toFloat() / state.duration else 0f
+
+                BoxWithConstraints(modifier = Modifier) {
+                    val fullWidth = maxWidth
+                    Slider(
+                        value = progressFraction,
+                        modifier = Modifier.fillMaxWidth(),
+                        onValueChange = {
+
+                            onAction(PlayerAction.OnSeek((it * state.duration).toLong()))
+                        },
+                        onValueChangeFinished = {
 
 
-
-                Slider(
-                    value = sliderValue,
-                    modifier = Modifier.fillMaxWidth(),
-                    onValueChange = {
-                       sliderValue = it
-                    },
-                    onValueChangeFinished = {
-                        onAction(PlayerAction.OnSeek((sliderValue* state.duration).toLong()))
-
-                    },
-                  track = { sliderState ->
-                      Box(
-                          modifier = Modifier
-                              .weight(1f)
-                              .height(6.dp) // Thin track height
-                      ) {
-                          // Inactive (background) track
-                          Box(
-                              modifier = Modifier
-                                  .fillMaxSize()
-                                  .background(
-                                      color = DarkBlueGrey28,
-                                      shape = RoundedCornerShape(50)
-                                  )
-                          )
-
-                          // Active (filled) track
-                          Box(
-                              modifier = Modifier
-                                  .fillMaxWidth(fraction = sliderState.value)
-                                  .height(6.dp)
-                                  .background(
-                                      color = MaterialTheme.colorScheme.onPrimary,
-                                      shape = RoundedCornerShape(50)
-                                  )
-                          )
-                      }
-                  },
-                    thumb = {
-                        Box(
-                            modifier = Modifier
-                                .padding(bottom = 16.dp) // Space between thumb and track
-                        ) {
-                            Text(
-                                text = "${state.currentDuration} / ${state.totalDuration}",
-                                style = MaterialTheme.typography.bodySmallRegular,
-                                color = MaterialTheme.colorScheme.surface,
-                                modifier = Modifier.background(
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    shape = RoundedCornerShape(6.dp)
+                        },
+                        track = { sliderState ->
+                            Box(
+                                modifier = Modifier
+                                    .requiredWidth(fullWidth)
+                                    .height(6.dp) // Thin track height
+                            ) {
+                                // Inactive (background) track
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(
+                                            color = DarkBlueGrey28,
+                                            shape = RoundedCornerShape(50)
+                                        )
                                 )
-                            )
-                        }
-                    },
-                    valueRange = 0f..1f
 
-                )
+                                // Active (filled) track
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(fraction = progressFraction)
+                                        .height(6.dp)
+                                        .background(
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            shape = RoundedCornerShape(50)
+                                        )
+                                )
+                            }
+                        },
+                        thumb = {
+                            Box(
+                                modifier = Modifier
+                                    .padding(bottom = 16.dp) // Space between thumb and track
+                            ) {
+                                Text(
+                                    text = "${state.currentDuration} / ${state.totalDuration}",
+                                    style = MaterialTheme.typography.bodySmallRegular,
+                                    color = MaterialTheme.colorScheme.surface,
+                                    modifier = Modifier.background(
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        shape = RoundedCornerShape(6.dp)
+                                    )
+                                )
+                            }
+                        },
+                        valueRange = 0f..1f
+
+                    )
+                }
+
+
                 Spacer(modifier = Modifier.height(20.dp))
 
                 PlaybackControls(

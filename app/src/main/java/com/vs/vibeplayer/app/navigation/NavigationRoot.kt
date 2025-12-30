@@ -52,11 +52,13 @@ fun NavigationRoot(
                 NavigateToScanScreen = {
                     navController.navigate(NavigationRoute.ScanScreen) {
                         launchSingleTop = true
+
                     }
                 },
                 NavigateWithTrackId = { trackId ->
                     navController.navigate(NavigationRoute.PlayerScreen(trackId)) {
                         launchSingleTop = true
+
                     }
 
                 },

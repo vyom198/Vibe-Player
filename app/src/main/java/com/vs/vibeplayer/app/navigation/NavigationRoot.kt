@@ -20,6 +20,7 @@ import com.vs.vibeplayer.main.presentation.permission.PermissionScreen
 import com.vs.vibeplayer.main.presentation.VibePlayer.scan.ScanRoot
 import com.vs.vibeplayer.main.presentation.miniplayer.MiniPlayerRoot
 import com.vs.vibeplayer.main.presentation.player.PlayerRoot
+import com.vs.vibeplayer.main.presentation.playlist.PlaylistRoot
 import com.vs.vibeplayer.main.presentation.search.SearchRoot
 
 @Composable
@@ -81,7 +82,8 @@ fun NavigationRoot(
                     navController.navigate(NavigationRoute.PlayerScreen()){
                         launchSingleTop = true
                     }
-                }
+                },
+
 
 
                 )
@@ -143,6 +145,10 @@ fun NavigationRoot(
                 }
             )
 
+        }
+
+        composable <NavigationRoute.PlaylistScreen>{
+            PlaylistRoot()
         }
 
     }

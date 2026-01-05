@@ -16,16 +16,16 @@
       <SelectionState runConfigName="Preview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="PlaybackControlPreview">
+      <SelectionState runConfigName="Itemss">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="PlayerScreenPrev">
+      <SelectionState runConfigName="FavouritePlayListItemPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="Preview (2)">
+      <SelectionState runConfigName="Preview (1)">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="SearchViewPreview">
+      <SelectionState runConfigName="PlaylistScreenPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

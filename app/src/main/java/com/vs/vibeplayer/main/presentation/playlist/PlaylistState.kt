@@ -1,6 +1,11 @@
 package com.vs.vibeplayer.main.presentation.playlist
 
+import com.vs.vibeplayer.main.presentation.model.PlaylistUI
+
 data class PlaylistState(
-    val paramOne: String = "default",
-    val paramTwo: List<String> = emptyList(),
+ val isShowing : Boolean = false,
+ val isExists : Boolean = false,
+ val playlistCount : Int = 0,
+ val playlists : List<PlaylistUI> = emptyList()
+
 )

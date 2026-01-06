@@ -1,19 +1,23 @@
 package com.vs.vibeplayer.core.database.di
 
 import androidx.room.Room
-import com.vs.vibeplayer.core.database.TrackDataBase
+import com.vs.vibeplayer.core.database.VibePlayerDataBase
 import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
 
 val databaseModule = module {
-    single<TrackDataBase> {
+    single<VibePlayerDataBase> {
         Room.databaseBuilder(
             androidApplication(),
-            TrackDataBase::class.java,
+            VibePlayerDataBase::class.java,
             "tracks.db",
-        ).build()
+        ).fallbackToDestructiveMigration(true).build()
     }
     single {
-        get<TrackDataBase>().trackdao
+        get<VibePlayerDataBase>().trackdao
+    }
+
+    single {
+        get<VibePlayerDataBase>().playlistdao
     }
 }

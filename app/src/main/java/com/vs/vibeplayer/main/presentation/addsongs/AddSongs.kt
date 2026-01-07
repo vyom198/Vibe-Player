@@ -19,10 +19,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,7 +34,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,16 +48,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vs.vibeplayer.R
+import com.vs.vibeplayer.core.buttons.VButton
 import com.vs.vibeplayer.core.theme.DarkBlueGrey28
 import com.vs.vibeplayer.core.theme.VibePlayerTheme
 import com.vs.vibeplayer.core.theme.bodyLargeMedium
 import com.vs.vibeplayer.core.theme.bodyLargeRegular
+import com.vs.vibeplayer.core.theme.bodyMediumRegular
 import com.vs.vibeplayer.core.theme.bodySmallRegular
 import com.vs.vibeplayer.core.theme.disabled
 import com.vs.vibeplayer.core.theme.hover
-import com.vs.vibeplayer.main.presentation.search.SearchAction
+import com.vs.vibeplayer.main.presentation.addsongs.components.AddSongSearchResultItem
+import com.vs.vibeplayer.main.presentation.addsongs.components.CustomCheckBox
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -78,143 +82,179 @@ fun AddSongsRoot(
 fun AddSongsScreen(
     state: AddSongsState,
     onAction: (AddSongsAction) -> Unit,
-    searchText : String,
-    onBackClick : () -> Unit
+    searchText: String,
+    onBackClick: () -> Unit
 ) {
-    Scaffold(modifier = Modifier.fillMaxSize(),
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        floatingActionButton = {
+            Button(onClick = {},
+
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = Color.Transparent
+
+                ),
+                shape = CircleShape,
+                enabled = state.selectedIds.isNotEmpty(),
+                modifier = Modifier.width(383.dp ).height(
+                    44.dp
+                )) {
+                Text(text = "OK")
+            }
+        },
+        floatingActionButtonPosition = FabPosition.Center,
         topBar = {
             CenterAlignedTopAppBar(
-                 title = {
-                     Text(text = "Add Songs",
-                         textAlign = TextAlign.Center,
-                         style = MaterialTheme.typography.bodyLargeMedium,
-                         color = MaterialTheme.colorScheme.onPrimary)
-                 },
-                 navigationIcon = {
-                     IconButton(onClick = onBackClick,
-                          modifier = Modifier.padding(start = 10.dp).background(
-                              color = MaterialTheme.colorScheme.hover,
-                              shape = CircleShape
-                          ).clip(
-                              shape = CircleShape
-                          ).size(36.dp)){
-                         Icon(
-                             imageVector = Icons.Default.ArrowBack ,
-                             contentDescription = null,
-                             modifier = Modifier.size(16.dp),
-                             tint = MaterialTheme.colorScheme.secondary
-                         )
-                     }
-                 }
-             )
-
-
-           }
-        ) {paddingValues ->
-
-            Column(modifier = Modifier.padding(paddingValues).padding(horizontal = 16.dp).fillMaxSize()) {
-             var searchText by remember { mutableStateOf(searchText) }
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                    value = searchText,
-                    onValueChange = {
-                        searchText = it
-                        onAction(AddSongsAction.OnTextChange(it))
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = DarkBlueGrey28,
-                        unfocusedBorderColor = DarkBlueGrey28,
-                        focusedContainerColor = MaterialTheme.colorScheme.hover,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.hover,
-                    ),
-                    leadingIcon = {
+                title = {
+                    Text(
+                        text = if(state.selectedIds.isNotEmpty())"${state.selectedIds.size} Selected" else "Add Songs",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyLargeMedium,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBackClick,
+                        modifier = Modifier
+                            .padding(start = 10.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.hover,
+                                shape = CircleShape
+                            )
+                            .clip(
+                                shape = CircleShape
+                            )
+                            .size(36.dp)
+                    ) {
                         Icon(
-                           painter =  painterResource(R.drawable.search),
+                            imageVector = Icons.Default.ArrowBack,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.secondary
                         )
-                    },
-                    placeholder ={
-                        Text(text = "Search",
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyLargeRegular,
-                            color = MaterialTheme.colorScheme.secondary)
-                    },
-
-                    shape = CircleShape,
-
-                    trailingIcon = {
-                        Icon(
-                            modifier = Modifier.clickable{
-                                searchText = ""
-                                onAction(AddSongsAction.OnClearClick)
-                            },
-                            imageVector = Icons.Default.Close,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.disabled
-                        )
-
                     }
-
-                )
-
-                if(state.searchResults.isNotEmpty()){
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        item {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                Row(modifier = Modifier.height(52.dp).fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically) {
-
-                                    Checkbox(
-                                        checked = false,
-                                        onCheckedChange = null,
-
-
-                                        modifier = Modifier.size(28.dp).border(
-                                            width = 1.dp,
-                                            color = DarkBlueGrey28,
-                                            shape = CircleShape
-
-                                        ).clip(
-                                            CircleShape
-                                        ),
-                                        colors = CheckboxDefaults.colors(
-                                            checkedColor = MaterialTheme.colorScheme.primary,
-                                            uncheckedColor = MaterialTheme.colorScheme.secondary,
-                                            checkmarkColor = Color.White
-
-                                        )
-
-                                    )
-                                    Spacer(modifier = Modifier.width(11.dp))
-                                    Text(text = "Select All",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onPrimary)
-
-                                }
-                                HorizontalDivider(thickness = 1.dp , color = DarkBlueGrey28)
-
-                            }
-
-                        }
-                        items(state.searchResults){
-
-                            AddSongSearchResultItem(item = it)
-                            HorizontalDivider(thickness = 1.dp , color = DarkBlueGrey28)
-                        }
-                    }
-                }else{
-                    Text(text = "No Results Found",
-                        textAlign = TextAlign.Center,
-                        style =
-                        MaterialTheme.typography.bodySmallRegular,
-                        color = MaterialTheme.colorScheme.secondary)
                 }
+            )
 
 
         }
+    ) { paddingValues ->
 
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
+                .fillMaxSize()
+        ) {
+            var searchText by remember { mutableStateOf(searchText) }
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                value = searchText,
+                onValueChange = {
+                    searchText = it
+                    onAction(AddSongsAction.OnTextChange(it))
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = DarkBlueGrey28,
+                    unfocusedBorderColor = DarkBlueGrey28,
+                    focusedContainerColor = MaterialTheme.colorScheme.hover,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.hover,
+                ),
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.search),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                },
+                placeholder = {
+                    Text(
+                        text = "Search",
+                        style = MaterialTheme.typography.bodyLargeRegular,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                },
+
+                shape = CircleShape,
+
+                trailingIcon = {
+                    Icon(
+                        modifier = Modifier.clickable {
+                            searchText = ""
+                            onAction(AddSongsAction.OnClearClick)
+                        },
+                        imageVector = Icons.Default.Close,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.disabled
+                    )
+
+                }
+
+            )
+
+            if (state.searchResults.isNotEmpty()) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier
+                                    .height(52.dp)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CustomCheckBox(
+                                    checked = state.isSelectAll,
+                                    onCheckedChange = {
+                                       onAction(AddSongsAction.onSelectAll(it))
+                                    },
+
+                                    )
+                                Spacer(modifier = Modifier.width(11.dp))
+                                Text(
+                                    text = "Select All",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+
+                            }
+                            HorizontalDivider(thickness = 1.dp, color = DarkBlueGrey28)
+
+                        }
+
+                    }
+                    items(state.searchResults) {
+
+                        AddSongSearchResultItem(item = it ,
+                            onToggleSelection = { id , isSelected ->
+                                onAction(AddSongsAction.onToggleClickbyItem(id = id , isSelected = isSelected))
+                            }
+                            )
+                        HorizontalDivider(thickness = 1.dp, color = DarkBlueGrey28)
+                    }
+                }
+            } else {
+                Spacer(modifier = Modifier.height(11.dp))
+                Column(modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally){
+                    Text(
+                        text = "No Results Found",
+                        style =
+                            MaterialTheme.typography.bodyMediumRegular,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+
+            }
+
+
+        }
 
 
     }

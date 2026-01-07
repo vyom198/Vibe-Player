@@ -2,6 +2,7 @@ package com.vs.vibeplayer.main.presentation.addsongs
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vs.vibeplayer.core.database.playlist.PlaylistDao
 import com.vs.vibeplayer.core.database.track.TrackDao
 import com.vs.vibeplayer.main.presentation.search.SearchResult
 import com.vs.vibeplayer.main.presentation.search.SearchState
@@ -16,7 +17,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AddSongsViewModel(
-    private val trackDao: TrackDao
+    private val trackDao: TrackDao,
+    private val playlistDao : PlaylistDao
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -57,7 +59,7 @@ class AddSongsViewModel(
                     _state.update {
                         it.copy(
                             searchResults = results ,
-                           isSearching = false
+
                         )
                     }
                 }
@@ -73,8 +75,35 @@ class AddSongsViewModel(
             }
             is AddSongsAction.OnTextChange ->{
                 _searchText.value = action.query
-                _state.update {
-                    it.copy(isSearching = false)
+
+            }
+
+           is  AddSongsAction.onSelectAll -> {
+                viewModelScope.launch {
+                    _state.value.searchResults.forEach {
+                        it.copy(isSelected = action.isSelectAll)
+                    }
+                    _state.update {
+                        it.copy(
+                            selectedIds = if(action.isSelectAll)it.searchResults.map { it.id }.toSet() else emptySet(),
+                            isSelectAll = action.isSelectAll
+                        )
+                    }
+                }
+            }
+            is AddSongsAction.onToggleClickbyItem -> {
+
+                viewModelScope.launch {
+                    _state.update {
+                       it.copy(
+                           selectedIds =  if(action.isSelected){ it.selectedIds.plus(action.id)} else {
+                               it.selectedIds.minus(action.id)
+                           }
+                       )
+                    }
+                    val index = _state.value.searchResults.indexOfFirst { it.id == action.id }
+                    _state.value.searchResults[index].copy(isSelected = action.isSelected)
+
                 }
             }
         }

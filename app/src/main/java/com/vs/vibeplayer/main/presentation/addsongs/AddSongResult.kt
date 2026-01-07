@@ -5,7 +5,8 @@ data class AddSongResult(
     val title: String,
     val artist: String,
     val cover: ByteArray? = null,
-    val totalDurationMs: Long
+    val totalDurationMs: Long,
+    val isSelected : Boolean = false
 ){
     val totalDurationString: String
         get() = formatDuration(totalDurationMs)

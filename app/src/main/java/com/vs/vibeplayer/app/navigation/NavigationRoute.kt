@@ -18,6 +18,8 @@ sealed interface NavigationRoute {
     @Serializable
     data object SearchScreen
 
+
+
     @Serializable
-    data object  PlaylistScreen
+    data object AddSongsScreen
 }

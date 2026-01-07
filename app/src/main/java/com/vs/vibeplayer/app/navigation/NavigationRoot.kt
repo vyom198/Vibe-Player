@@ -18,6 +18,7 @@ import androidx.navigation.compose.composable
 import com.vs.vibeplayer.main.presentation.VibePlayer.VibePlayerRoot
 import com.vs.vibeplayer.main.presentation.permission.PermissionScreen
 import com.vs.vibeplayer.main.presentation.VibePlayer.scan.ScanRoot
+import com.vs.vibeplayer.main.presentation.addsongs.AddSongsRoot
 import com.vs.vibeplayer.main.presentation.miniplayer.MiniPlayerRoot
 import com.vs.vibeplayer.main.presentation.player.PlayerRoot
 import com.vs.vibeplayer.main.presentation.playlist.PlaylistRoot
@@ -79,14 +80,17 @@ fun NavigationRoot(
                     }
                 },
                 onMiniPlayerClick = {
-                    navController.navigate(NavigationRoute.PlayerScreen()){
+                    navController.navigate(NavigationRoute.PlayerScreen()) {
                         launchSingleTop = true
                     }
                 },
 
-
-
-                )
+                onCreateClick = {
+                    navController.navigate(NavigationRoute.AddSongsScreen) {
+                        launchSingleTop = true
+                    }
+                }
+            )
         }
         composable<NavigationRoute.ScanScreen> {
             ScanRoot(
@@ -147,8 +151,14 @@ fun NavigationRoot(
 
         }
 
-        composable <NavigationRoute.PlaylistScreen>{
-            PlaylistRoot()
+
+
+        composable <NavigationRoute.AddSongsScreen>{
+            AddSongsRoot(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
         }
 
     }

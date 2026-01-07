@@ -57,6 +57,7 @@ import com.vs.vibeplayer.core.theme.bodyLargeRegular
 import com.vs.vibeplayer.core.theme.bodyMediumRegular
 import com.vs.vibeplayer.core.theme.bodySmallRegular
 import com.vs.vibeplayer.core.theme.hover
+import com.vs.vibeplayer.main.presentation.components.ObserveAsEvents
 import com.vs.vibeplayer.main.presentation.playlist.components.Playlist
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -64,13 +65,36 @@ import kotlin.time.Duration
 
 @Composable
 fun PlaylistRoot(
-    viewModel: PlaylistViewModel = koinViewModel()
+    viewModel: PlaylistViewModel = koinViewModel(),
+    onCreateClick: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    ObserveAsEvents(flow = viewModel.events) { event ->
 
+        when(event){
+            is PlaylistEvent.OnCreateChannel -> {
+                if (event.isExists) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = "Playlist already exists",
+                            duration = SnackbarDuration.Short
+                        )
+
+                    }
+
+                }else{
+                    onCreateClick.invoke()
+                }
+            }
+        }
+
+    }
     PlaylistScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
+        snackbarHostState = snackbarHostState
     )
 }
 
@@ -80,22 +104,12 @@ fun PlaylistRoot(
 fun PlaylistScreen(
     state: PlaylistState,
     onAction: (PlaylistAction) -> Unit,
+    snackbarHostState : SnackbarHostState
 
 ) {
     val modalState = rememberModalBottomSheetState()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(state.isExists) {
-        if (state.isExists) {
-            snackbarHostState.showSnackbar(
-                message = "Playlist already exists",
-                duration = SnackbarDuration.Short
-            )
-            onAction.invoke(PlaylistAction.onSnackBarDismissed)
-        }
 
 
-    }
     Scaffold(
         modifier = Modifier.fillMaxSize() ,
         snackbarHost = {
@@ -263,9 +277,7 @@ fun PlaylistScreen(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             OutlinedButton(
-                                onClick =
-                                    {
-                                        onAction(PlaylistAction.onDismissSheet)
+                                onClick = { onAction(PlaylistAction.onDismissSheet)
                                         title = ""
                                     }, modifier = Modifier.width(180.dp)
                                     .height(44.dp)
@@ -280,7 +292,8 @@ fun PlaylistScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
                                 onClick = { onAction(PlaylistAction.onCreateClick(title))
-                                            title = ""
+                                           title = ""
+
                                           },
                                 enabled = title.isNotEmpty(),
                                 colors = ButtonDefaults.buttonColors(

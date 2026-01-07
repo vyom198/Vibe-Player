@@ -5,10 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.vs.vibeplayer.core.database.playlist.PlaylistDao
 import com.vs.vibeplayer.core.database.playlist.PlaylistEntity
 import com.vs.vibeplayer.core.database.track.TrackDao
+import com.vs.vibeplayer.main.presentation.VibePlayer.VibePlayerEvent
 import com.vs.vibeplayer.main.presentation.model.PlaylistUI
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -17,7 +20,8 @@ class PlaylistViewModel(
     private val playlistDao: PlaylistDao,
     private val trackDao: TrackDao
 ) : ViewModel() {
-
+    private val eventChannel = Channel<PlaylistEvent>()
+    val events = eventChannel.receiveAsFlow()
     private var hasLoadedInitialData = false
 
     private val _state = MutableStateFlow(PlaylistState())
@@ -72,17 +76,22 @@ class PlaylistViewModel(
             if(!inserted){
                 _state.update {
                     it.copy(
-                        isExists = true
+                        isExists = true,
+                        isShowing = false
+
 
                     )
                 }
+                eventChannel.send(PlaylistEvent.OnCreateChannel(true))
             }else{
                 _state.update {
                     it.copy(
-                        isExists = false
-
+                        isExists = false,
+                        isShowing = false
                     )
                 }
+                eventChannel.send(PlaylistEvent.OnCreateChannel(false
+                ))
             }
 
         }
@@ -121,12 +130,9 @@ class PlaylistViewModel(
             }
 
             is PlaylistAction.onCreateClick -> {
+
                 insertIfNotExists(action.title)
-                _state.update {
-                    it.copy(
-                        isShowing = false
-                    )
-                }
+
 
             }
 

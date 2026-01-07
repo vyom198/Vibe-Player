@@ -8,6 +8,7 @@ import com.vs.vibeplayer.main.data.player.ExoPlayerManager
 import com.vs.vibeplayer.main.domain.audio.AudioDataSource
 import com.vs.vibeplayer.main.domain.player.PlayerManager
 import com.vs.vibeplayer.main.presentation.VibePlayer.VibePlayerViewModel
+import com.vs.vibeplayer.main.presentation.addsongs.AddSongsViewModel
 import com.vs.vibeplayer.main.presentation.miniplayer.MiniPlayerViewModel
 import com.vs.vibeplayer.main.presentation.permission.PermissionViewModel
 import com.vs.vibeplayer.main.presentation.player.PlayerViewModel
@@ -38,4 +39,5 @@ val mainModule = module {
     viewModelOf(::MiniPlayerViewModel)
     viewModelOf(::SearchViewModel)
     viewModelOf(::PlaylistViewModel)
+    viewModelOf(::AddSongsViewModel)
 }

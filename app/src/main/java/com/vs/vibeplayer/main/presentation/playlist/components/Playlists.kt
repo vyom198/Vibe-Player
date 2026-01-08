@@ -65,7 +65,7 @@ fun PlayListItem(playlist: PlaylistUI) {
               )
 
                 Text(
-                    text = "${if(playlist.trackIds == null) 0 else playlist.trackIds.size} Songs",
+                    text = "${playlist.trackIds?.size ?: 0 } Songs",
                     style = MaterialTheme.typography.bodyMediumRegular,
                     color = MaterialTheme.colorScheme.secondary
                 )

@@ -75,7 +75,7 @@ fun VibePlayerRoot(
     onShuffleClick: () -> Unit,
     onPlayClick: () -> Unit,
     onMiniPlayerClick : () -> Unit,
-    onCreateClick: () -> Unit
+    onCreateClick: (String) -> Unit
 ){
     val state by viewModel.state.collectAsStateWithLifecycle()
     VibePlayerScreen(
@@ -103,7 +103,7 @@ fun VibePlayerScreen(
     onPlayClick : () -> Unit,
     onShuffleClick : () -> Unit,
     onMiniPlayerClick: () -> Unit,
-    onCreateClick : () -> Unit
+    onCreateClick : (String) -> Unit
 
 ) {
     val lazyListState = rememberLazyListState()

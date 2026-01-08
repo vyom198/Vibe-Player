@@ -7,7 +7,7 @@ sealed interface NavigationRoute {
     data object Permission
 
     @Serializable
-     data object VibePlayer
+    data object VibePlayer
 
 
     @Serializable
@@ -21,5 +21,7 @@ sealed interface NavigationRoute {
 
 
     @Serializable
-    data object AddSongsScreen
+    data class AddSongs(val playlistTitle : String)
+
+
 }

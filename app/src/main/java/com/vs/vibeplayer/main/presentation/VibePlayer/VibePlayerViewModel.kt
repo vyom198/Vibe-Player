@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import androidx.core.net.toUri
+import androidx.lifecycle.SavedStateHandle
 import com.vs.vibeplayer.core.database.track.TrackEntity
 import com.vs.vibeplayer.main.data.audio.ContentUriChecker
 import com.vs.vibeplayer.main.domain.player.PlayerManager
@@ -29,18 +30,19 @@ class VibePlayerViewModel(
     private val audioDataSource: AudioDataSource,
     private val  trackDao: TrackDao,
     private val contentUriChecker: ContentUriChecker,
-    private val playerManager: PlayerManager
+    private val playerManager: PlayerManager ,
+
 ) : ViewModel() {
     private val eventChannel = Channel<VibePlayerEvent>()
     val events = eventChannel.receiveAsFlow()
     private val _state = MutableStateFlow(VibePlayerState(scanning = true))
     val state = _state.asStateFlow()
-
     private var duration by mutableIntStateOf(0)
     private var size by mutableIntStateOf(0)
     private var currentPlaylist: List<TrackEntity> = emptyList()
 
     init {
+
         _state.update {
             it.copy(
                 isPlaying = playerManager.isPlayerEnabled()

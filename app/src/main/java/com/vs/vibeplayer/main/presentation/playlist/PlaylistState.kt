@@ -5,7 +5,6 @@ import com.vs.vibeplayer.main.presentation.model.PlaylistUI
 data class PlaylistState(
  val isShowing : Boolean = false,
  val isExists : Boolean = false,
- val playlistCount : Int = 0,
- val playlists : List<PlaylistUI> = emptyList()
+ val playlists : List<PlaylistUI> = emptyList() ,
 
 )

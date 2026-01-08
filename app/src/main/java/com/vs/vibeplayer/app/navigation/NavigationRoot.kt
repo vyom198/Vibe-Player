@@ -86,12 +86,13 @@ fun NavigationRoot(
                 },
 
                 onCreateClick = {
-                    navController.navigate(NavigationRoute.AddSongsScreen) {
+                    navController.navigate(NavigationRoute.AddSongs(it)) {
                         launchSingleTop = true
                     }
                 }
             )
         }
+
         composable<NavigationRoute.ScanScreen> {
             ScanRoot(
                 onBackClick = {
@@ -153,11 +154,14 @@ fun NavigationRoot(
 
 
 
-        composable <NavigationRoute.AddSongsScreen>{
+        composable <NavigationRoute.AddSongs>{
             AddSongsRoot(
                 onBackClick = {
                     navController.popBackStack()
-                }
+                },
+
+
+
             )
         }
 

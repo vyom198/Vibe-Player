@@ -33,11 +33,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,20 +64,45 @@ import com.vs.vibeplayer.core.theme.disabled
 import com.vs.vibeplayer.core.theme.hover
 import com.vs.vibeplayer.main.presentation.addsongs.components.AddSongSearchResultItem
 import com.vs.vibeplayer.main.presentation.addsongs.components.CustomCheckBox
+import com.vs.vibeplayer.main.presentation.components.ObserveAsEvents
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AddSongsRoot(
     viewModel: AddSongsViewModel = koinViewModel(),
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit ,
+
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val searchText by viewModel.searchText.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    ObserveAsEvents(flow = viewModel.events){ event ->
+       when(event){
+           AddSongEvent.onInsertEvent -> {
+               scope.launch {
+
+                   snackbarHostState.showSnackbar(
+                       message = "${state.selectedIds.size} songs added to playlist.",
+                      duration = SnackbarDuration.Short
+                   )
+
+               }
+               onBackClick.invoke()
+
+           }
+       }
+
+    }
     AddSongsScreen(
         state = state,
         onAction = viewModel::onAction,
         searchText = searchText,
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
+        snackbarHostState = snackbarHostState
+
     )
 }
 
@@ -83,12 +112,16 @@ fun AddSongsScreen(
     state: AddSongsState,
     onAction: (AddSongsAction) -> Unit,
     searchText: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        snackbarHost = {
+           SnackbarHost(hostState = snackbarHostState)
+        },
         floatingActionButton = {
-            Button(onClick = {},
+            Button(onClick = {onAction(AddSongsAction.onInsertSong)},
 
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -150,14 +183,12 @@ fun AddSongsScreen(
                 .padding(horizontal = 16.dp)
                 .fillMaxSize()
         ) {
-            var searchText by remember { mutableStateOf(searchText) }
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight(),
                 value = searchText,
                 onValueChange = {
-                    searchText = it
                     onAction(AddSongsAction.OnTextChange(it))
                 },
                 colors = OutlinedTextFieldDefaults.colors(
@@ -187,7 +218,6 @@ fun AddSongsScreen(
                 trailingIcon = {
                     Icon(
                         modifier = Modifier.clickable {
-                            searchText = ""
                             onAction(AddSongsAction.OnClearClick)
                         },
                         imageVector = Icons.Default.Close,
@@ -261,15 +291,16 @@ fun AddSongsScreen(
 
 }
 
-@Preview
-@Composable
-private fun Preview() {
-    VibePlayerTheme {
-        AddSongsScreen(
-            state = AddSongsState(),
-            onAction = {},
-            searchText = "",
-            onBackClick = {}
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun Preview() {
+//    VibePlayerTheme {
+//        AddSongsScreen(
+//            state = AddSongsState(),
+//            onAction = {},
+//            searchText = "",
+//            onBackClick = {},
+//            snackbarHostState = remember { SnackbarHostState() }
+//        )
+//    }
+//}

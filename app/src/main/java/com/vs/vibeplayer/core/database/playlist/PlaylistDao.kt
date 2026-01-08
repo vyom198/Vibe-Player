@@ -28,7 +28,9 @@ interface PlaylistDao {
     @Query("SELECT EXISTS(SELECT 1 FROM playlistentity WHERE title = :title)")
     suspend fun playlistExists(title: String): Boolean
 
-    @Query("SELECT COUNT(*) FROM playlistentity")
-    suspend fun getPlaylistCount(): Int
+
+
+    @Query("SELECT * FROM playlistentity WHERE title = :title")
+    suspend fun getplaylistByTitle(title: String) : PlaylistEntity
 
 }

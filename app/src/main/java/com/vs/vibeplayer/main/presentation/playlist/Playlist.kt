@@ -59,6 +59,7 @@ import com.vs.vibeplayer.core.theme.bodySmallRegular
 import com.vs.vibeplayer.core.theme.hover
 import com.vs.vibeplayer.main.presentation.components.ObserveAsEvents
 import com.vs.vibeplayer.main.presentation.playlist.components.Playlist
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.time.Duration
@@ -66,17 +67,18 @@ import kotlin.time.Duration
 @Composable
 fun PlaylistRoot(
     viewModel: PlaylistViewModel = koinViewModel(),
-    onCreateClick: () -> Unit
+    onCreateClick: (String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     ObserveAsEvents(flow = viewModel.events) { event ->
 
-        when(event){
+        when(event) {
             is PlaylistEvent.OnCreateChannel -> {
                 if (event.isExists) {
                     scope.launch {
+
                         snackbarHostState.showSnackbar(
                             message = "Playlist already exists",
                             duration = SnackbarDuration.Short
@@ -84,10 +86,11 @@ fun PlaylistRoot(
 
                     }
 
-                }else{
-                    onCreateClick.invoke()
+                } else {
+                    onCreateClick(event.title!!)
                 }
             }
+
         }
 
     }
@@ -129,7 +132,7 @@ fun PlaylistScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "${state.playlistCount + 1} Playlist",
+                    text = "${state.playlists.size + 1} Playlist",
                     style = MaterialTheme.typography.bodyLargeMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
@@ -186,7 +189,7 @@ fun PlaylistScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "My Playlists (${state.playlistCount})",
+                text = "My Playlists (${state.playlists.size})",
                 style = MaterialTheme.typography.bodyLargeMedium,
                 color = MaterialTheme.colorScheme.secondary
             )

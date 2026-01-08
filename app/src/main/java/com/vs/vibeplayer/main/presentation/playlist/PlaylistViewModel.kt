@@ -1,5 +1,6 @@
 package com.vs.vibeplayer.main.presentation.playlist
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vs.vibeplayer.core.database.playlist.PlaylistDao
@@ -15,21 +16,22 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class PlaylistViewModel(
     private val playlistDao: PlaylistDao,
-    private val trackDao: TrackDao
+
 ) : ViewModel() {
     private val eventChannel = Channel<PlaylistEvent>()
     val events = eventChannel.receiveAsFlow()
     private var hasLoadedInitialData = false
 
+
     private val _state = MutableStateFlow(PlaylistState())
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
-                 getPlaylists()
-                getPlaylistCount()
+                getPlaylists()
                 hasLoadedInitialData = true
             }
         }
@@ -60,11 +62,7 @@ class PlaylistViewModel(
         }
     }
 
-    suspend  fun getCoverArt(trackId: Long): ByteArray?{
-        val trackEntity = trackDao.getTrackById(trackId)
-        return trackEntity?.cover
 
-    }
 
 
     fun insertIfNotExists(title : String) {
@@ -90,25 +88,16 @@ class PlaylistViewModel(
                         isShowing = false
                     )
                 }
-                eventChannel.send(PlaylistEvent.OnCreateChannel(false
+
+                eventChannel.send(PlaylistEvent.OnCreateChannel(isExists = false,
+                    title = title
                 ))
             }
 
         }
     }
 
-    fun getPlaylistCount () {
-        viewModelScope.launch {
-            val count = playlistDao.getPlaylistCount()
-            _state.update {
-                it.copy(
-                    playlistCount = count
-                )
 
-            }
-        }
-
-    }
 
     fun onAction(action: PlaylistAction) {
         when (action) {

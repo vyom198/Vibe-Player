@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -230,35 +231,38 @@ fun AddSongsScreen(
             )
 
             if (state.searchResults.isNotEmpty()) {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    item {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Row(
-                                modifier = Modifier
-                                    .height(52.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                CustomCheckBox(
-                                    checked = state.isSelectAll,
-                                    onCheckedChange = {
-                                       onAction(AddSongsAction.onSelectAll(it))
-                                    },
+                LazyColumn(modifier = Modifier.fillMaxSize(),) {
+                    stickyHeader {
 
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    modifier = Modifier
+                                        .height(52.dp)
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    CustomCheckBox(
+                                        checked = state.isSelectAll,
+                                        onCheckedChange = {
+                                            onAction(AddSongsAction.onSelectAll(it))
+                                        },
+
+                                        )
+                                    Spacer(modifier = Modifier.width(11.dp))
+                                    Text(
+                                        text = "Select All",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onPrimary
                                     )
-                                Spacer(modifier = Modifier.width(11.dp))
-                                Text(
-                                    text = "Select All",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
+
+                                }
+                                HorizontalDivider(thickness = 1.dp, color = DarkBlueGrey28)
 
                             }
-                            HorizontalDivider(thickness = 1.dp, color = DarkBlueGrey28)
 
-                        }
 
                     }
+
                     items(state.searchResults) {
 
                         AddSongSearchResultItem(item = it ,
@@ -291,16 +295,3 @@ fun AddSongsScreen(
 
 }
 
-//@Preview
-//@Composable
-//private fun Preview() {
-//    VibePlayerTheme {
-//        AddSongsScreen(
-//            state = AddSongsState(),
-//            onAction = {},
-//            searchText = "",
-//            onBackClick = {},
-//            snackbarHostState = remember { SnackbarHostState() }
-//        )
-//    }
-//}

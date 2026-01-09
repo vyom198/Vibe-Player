@@ -51,7 +51,8 @@ class PlaylistViewModel(
                             PlaylistUI(
                                 id = playlist.id,
                                 title = playlist.title,
-                                 trackIds = playlist.trackIds
+                                 trackIds = playlist.trackIds ,
+                                coverArt = playlist.coverArt
                             )
                         }
                     )

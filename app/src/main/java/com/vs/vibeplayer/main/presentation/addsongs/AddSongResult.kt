@@ -4,7 +4,7 @@ data class AddSongResult(
     val id: Long,
     val title: String,
     val artist: String,
-    val cover: ByteArray? = null,
+    val cover: ByteArray?= null ,
     val totalDurationMs: Long,
     val isSelected : Boolean = false
 ){

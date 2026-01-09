@@ -6,9 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.vs.vibeplayer.core.database.playlist.PlaylistDao
 import com.vs.vibeplayer.core.database.playlist.PlaylistEntity
 import com.vs.vibeplayer.core.database.track.TrackDao
-import com.vs.vibeplayer.main.presentation.playlist.PlaylistEvent
-import com.vs.vibeplayer.main.presentation.search.SearchResult
-import com.vs.vibeplayer.main.presentation.search.SearchState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,16 +29,16 @@ class AddSongsViewModel(
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asStateFlow()
     private  val playlistTitle = savedStateHandle.get<String?>("playlistTitle")
-
+    private var isInserting = false
     private val _allTracks = trackDao.observeTracks()
-    private  var  totalCount = 0
+    private var totalTracks = emptyList<AddSongResult>()
 
     private val eventChannel = Channel<AddSongEvent>()
     val events = eventChannel.receiveAsFlow()
     private val _state = MutableStateFlow(AddSongsState())
     val state = _state.onStart {
             if (!hasLoadedInitialData) {
-               totalCount = trackDao.getTrackCount()
+                getTotalSongs()
                setupSearchPipeline()
                 hasLoadedInitialData = true
             }
@@ -52,14 +49,24 @@ class AddSongsViewModel(
             initialValue = AddSongsState()
         )
 
+
+    private fun getTotalSongs (){
+        viewModelScope.launch {
+           trackDao.observeTracks().collect {
+               totalTracks = it.map {
+                   it.toAddSongResult()
+               }
+           }
+        }
+    }
     private fun setupSearchPipeline() {
         viewModelScope.launch {
             _searchText
                 .debounce(300).combine(_allTracks) { query, tracks ->
                     if (query.isBlank() || query.length <2) {
-                       tracks.map {
-                           it.toAddSongResult()
-                       }
+                         tracks.map {
+                             it.toAddSongResult()
+                         }
                     } else {
                         tracks.filter { track ->
                             track.title.contains(query, ignoreCase = true) ||
@@ -79,7 +86,8 @@ class AddSongsViewModel(
                             } ,
 
                             selectedIds = state.selectedIds ,
-                            isSelectAll = state.selectedIds.size == totalCount
+                            isSelectAll = state.selectedIds.size == totalTracks.size
+
 
                         )
                     }
@@ -89,22 +97,25 @@ class AddSongsViewModel(
 
     private fun insertSongs(playlistTitle : String){
         viewModelScope.launch {
+            if (isInserting) {
+                return@launch
+            }
+
+            isInserting = true
            val  playlistEntityfromDb= playlistDao.getplaylistByTitle(playlistTitle)
-            Timber.d(playlistEntityfromDb.toString())
             val coverArt = getCoverArt(_state.value.selectedIds.first())
-            val newplayListEntity = PlaylistEntity(
+             val newplayListEntity = PlaylistEntity(
                 id = playlistEntityfromDb.id,
                 title = playlistTitle,
                 trackIds = _state.value.selectedIds.toList(),
                 coverArt = coverArt
             )
-            Timber.d(newplayListEntity.toString())
-                playlistDao.insert(
+                 playlistDao.insert(
                     newplayListEntity
                 )
 
             eventChannel.send(AddSongEvent.onInsertEvent)
-
+            isInserting = false
         }
 
     }
@@ -130,7 +141,7 @@ class AddSongsViewModel(
 
                     _state.update {
                         it.copy(
-                            selectedIds = if(action.isSelectAll)it.searchResults.map { it.id }.toSet() else emptySet(),
+                            selectedIds = if(action.isSelectAll)totalTracks.map { it.id }.toSet() else emptySet(),
                             isSelectAll = action.isSelectAll,
                             searchResults = it.searchResults.map {
                                 it.copy(isSelected = action.isSelectAll)
@@ -145,17 +156,16 @@ class AddSongsViewModel(
 
                 viewModelScope.launch {
                     _state.update { state->
+                        val newSelectedIds = if(action.isSelected) {
+                            state.selectedIds.plus(action.id)
+                        } else {
+                            state.selectedIds.minus(action.id)
+                        }
                        state.copy(
-                           selectedIds =  if(action.isSelected){ state.selectedIds.plus(action.id)} else {
-                               state.selectedIds.minus(action.id)
-                           },
-                           isSelectAll = state.selectedIds.size == totalCount,
+                           selectedIds =  newSelectedIds,
+                           isSelectAll = newSelectedIds.size == totalTracks.size  ,
                            searchResults = state.searchResults.map {
-                               if(it.id == action.id){
-                                   it.copy(isSelected = !it.isSelected)
-                               }else{
-                                   it.copy(isSelected = it.isSelected)
-                               }
+                               it.copy(isSelected = it.id in newSelectedIds)
                            }
                        )
                     }

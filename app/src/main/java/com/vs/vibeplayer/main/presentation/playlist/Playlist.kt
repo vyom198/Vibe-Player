@@ -41,6 +41,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -132,7 +133,7 @@ fun PlaylistScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "${state.playlists.size + 1} Playlist",
+                    text = if(state.playlists.isEmpty())"1 Playlist" else "${state.playlists.size + 1} Playlists",
                     style = MaterialTheme.typography.bodyLargeMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
@@ -163,7 +164,8 @@ fun PlaylistScreen(
                 AsyncImage(
                     model = R.drawable.favourite_playlist,
                     contentDescription = null,
-                    modifier = Modifier.size(64.dp)
+                    modifier = Modifier.size(64.dp) ,
+                    contentScale = ContentScale.Fit
 
                     )
                 Spacer(modifier = Modifier.width(8.dp))

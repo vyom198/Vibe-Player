@@ -31,6 +31,7 @@ import com.vs.vibeplayer.R
 import com.vs.vibeplayer.core.theme.bodyMediumRegular
 import com.vs.vibeplayer.core.theme.hover
 import com.vs.vibeplayer.main.presentation.model.PlaylistUI
+import timber.log.Timber
 
 @Composable
 fun Playlist( playlists : List<PlaylistUI>) {
@@ -45,14 +46,15 @@ fun Playlist( playlists : List<PlaylistUI>) {
 fun PlayListItem(playlist: PlaylistUI) {
     Row(modifier = Modifier.height(88.dp).fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically) {
+
         AsyncImage(
             model = playlist.coverArt,
-            modifier = Modifier.clip(
+            modifier = Modifier.size(64.dp).clip(
                 CircleShape
             ),
-            placeholder = painterResource( R.drawable.playlist_img),
-            error = painterResource( R.drawable.playlist_img),
+            fallback = painterResource( R.drawable.playlist_img),
             contentDescription = null,
+            contentScale = ContentScale.Crop
 
         )
 

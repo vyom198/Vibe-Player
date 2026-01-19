@@ -151,7 +151,7 @@ fun SearchScreen(
                         Text(
                             text = stringResource(R.string.cancel),
                             style = MaterialTheme.typography.bodyLargeMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primaryContainer
                         )
                     }
 

@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SliderDefaults.Track
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
@@ -47,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vs.vibeplayer.R
+import com.vs.vibeplayer.core.database.track.TrackEntity
 import com.vs.vibeplayer.core.theme.AlmostBlack
 import com.vs.vibeplayer.core.theme.SlateGrey
 import com.vs.vibeplayer.core.theme.VibePlayerTheme
@@ -196,7 +198,7 @@ fun VibePlayerScreen(
                     modifier = Modifier
                         .size(56.dp)
                         .background(
-                            color = MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.primaryContainer,
                             shape = CircleShape
                         )
                 ) {
@@ -249,6 +251,7 @@ fun VibePlayerScreen(
                     PrimaryTabRow(
                         selectedTabIndex = selectedTabIndex,
                         modifier = Modifier.fillMaxWidth(),
+
                     )  {
                         tabItems.forEachIndexed {index,item ->
                             Tab(
@@ -317,19 +320,4 @@ fun VibePlayerScreen(
 
 }
 
-//@Preview
-//@Composable
-//private fun Preview() {
-//    VibePlayerTheme {
-//        VibePlayerScreen(
-//            state = VibePlayerState(),
-//            onAction = {},
-//            onScanClick = {},
-//            NavigateWithTrackId = {},
-//            onSearchClick = {},
-//            onPlayClick = {},
-//            onShuffleClick = {},
-//            onMiniPlayerClick = {}
-//        )
-//    }
-//}
+

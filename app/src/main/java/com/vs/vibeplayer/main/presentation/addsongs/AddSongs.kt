@@ -125,7 +125,7 @@ fun AddSongsScreen(
             Button(onClick = {onAction(AddSongsAction.onInsertSong)},
 
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                     disabledContainerColor = Color.Transparent,
                     disabledContentColor = Color.Transparent

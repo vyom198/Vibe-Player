@@ -219,7 +219,7 @@ fun ScanScreen(
                                 RadioButton(
                                     selected = (state.durationValue == value),
                                     colors = RadioButtonDefaults.colors(
-                                        selectedColor = MaterialTheme.colorScheme.primary,
+                                        selectedColor = MaterialTheme.colorScheme.primaryContainer,
                                         unselectedColor = MaterialTheme.colorScheme.onPrimary
 
                                     ),
@@ -276,7 +276,7 @@ fun ScanScreen(
                                     RadioButton(
                                         selected =  state.sizeValue== value,
                                         colors = RadioButtonDefaults.colors(
-                                            selectedColor = MaterialTheme.colorScheme.primary,
+                                            selectedColor = MaterialTheme.colorScheme.primaryContainer,
                                             unselectedColor = MaterialTheme.colorScheme.onPrimary
 
                                         ),
@@ -311,7 +311,7 @@ fun ScanScreen(
                     containerColor = if(state.loadingInReScan ){
                         MaterialTheme.colorScheme.hover
                     }else{
-                        MaterialTheme.colorScheme.primary
+                        MaterialTheme.colorScheme.primaryContainer
                     }
                 )
             ){

@@ -35,13 +35,13 @@ fun CustomCheckBox(
             .size(16.dp)
             .border(
                 width = if (checked) 0.dp else 1.dp,
-                color = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                color = if (checked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondary,
                 shape = CircleShape
             )
             .clip(
                 shape = CircleShape
             ).background(
-                color = if (checked) MaterialTheme.colorScheme.primary else Color.Transparent
+                color = if (checked) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
             )
             .toggleable(
                 value = checked,

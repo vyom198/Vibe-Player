@@ -11,7 +11,7 @@ import com.vs.vibeplayer.core.database.track.TrackEntity
 
 @Database(
     entities = [TrackEntity::class, PlaylistEntity :: class],
-    version = 2,
+    version = 4,
 )
 
 @TypeConverters(

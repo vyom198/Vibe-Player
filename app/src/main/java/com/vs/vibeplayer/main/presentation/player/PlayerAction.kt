@@ -12,4 +12,15 @@ sealed interface PlayerAction {
    object OnRepeatClick: PlayerAction
 
     data class OnSeek(val position : Long): PlayerAction
+
+
+    object  onDismissBs : PlayerAction
+
+    object ToggleFavourite  : PlayerAction
+
+    object onPlaylistIconClick : PlayerAction
+
+    data class  onPlaylistItemClicked(val playlistId : Long ) : PlayerAction
+
+    object  onCreatePlaylist : PlayerAction
 }

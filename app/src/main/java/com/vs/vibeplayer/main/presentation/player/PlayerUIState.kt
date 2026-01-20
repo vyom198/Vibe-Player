@@ -1,6 +1,9 @@
 package com.vs.vibeplayer.main.presentation.player
 
+import android.provider.MediaStore
 import com.vs.vibeplayer.core.database.track.TrackEntity
+import com.vs.vibeplayer.main.presentation.model.AudioTrackUI
+import com.vs.vibeplayer.main.presentation.model.PlaylistUI
 
 
 data class PlayerUIState(
@@ -12,7 +15,10 @@ data class PlayerUIState(
     val canGoPrevious: Boolean = false,
     val currentPositionFraction: Float = 0f,
     val repeatType: RepeatType = RepeatType.OFF,
-    val isShuffleEnabled: Boolean = false
+    val isShuffleEnabled: Boolean = false,
+    val isBottomSheetShowing : Boolean = false,
+    val playlists : List<PlaylistUI> = emptyList() ,
+    val favouriteSongs : List<AudioTrackUI> = emptyList()
 ){
     val progress: Float
         get() = if (duration > 0) {

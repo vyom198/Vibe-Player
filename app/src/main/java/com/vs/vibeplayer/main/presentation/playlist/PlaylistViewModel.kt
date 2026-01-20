@@ -113,7 +113,9 @@ class PlaylistViewModel(
 
                 _state.update {
                     it.copy(
-                        isShowing = false
+                        isShowing = false ,
+                        title =  ""
+
                     )
                 }
 
@@ -122,6 +124,7 @@ class PlaylistViewModel(
             is PlaylistAction.onCreateClick -> {
 
                 insertIfNotExists(action.title)
+
 
 
             }
@@ -133,6 +136,14 @@ class PlaylistViewModel(
                     )
                 }
 
+            }
+
+            is PlaylistAction.onTextChange -> {
+                _state.update {
+                    it.copy(
+                        title = action.title
+                    )
+                }
             }
         }
     }

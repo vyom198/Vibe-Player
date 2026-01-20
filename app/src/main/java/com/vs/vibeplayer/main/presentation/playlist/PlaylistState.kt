@@ -6,5 +6,6 @@ data class PlaylistState(
  val isShowing : Boolean = false,
  val isExists : Boolean = false,
  val playlists : List<PlaylistUI> = emptyList() ,
+ val title : String = ""
 
 )

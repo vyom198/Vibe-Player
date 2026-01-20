@@ -58,6 +58,7 @@ import com.vs.vibeplayer.core.theme.bodyLargeRegular
 import com.vs.vibeplayer.core.theme.bodyMediumRegular
 import com.vs.vibeplayer.core.theme.bodySmallRegular
 import com.vs.vibeplayer.core.theme.hover
+import com.vs.vibeplayer.main.presentation.components.CreatePlaylistBottomSheet
 import com.vs.vibeplayer.main.presentation.components.ObserveAsEvents
 import com.vs.vibeplayer.main.presentation.playlist.components.Playlist
 import kotlinx.coroutines.delay
@@ -217,110 +218,24 @@ fun PlaylistScreen(
             } else {
                 Playlist(playlists = state.playlists)
             }
-            var title by remember { mutableStateOf("") }
+
             if (state.isShowing) {
-                ModalBottomSheet(
-                    dragHandle = null,
-                    onDismissRequest = { onAction(PlaylistAction.onDismissSheet) },
-                    sheetState = modalState,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ) {
+                CreatePlaylistBottomSheet(
+                    modalState = modalState,
+                    onDismiss = {
+                        onAction(PlaylistAction.onDismissSheet)
+                    },
+                    onValueChange = {
+                        onAction(PlaylistAction.onTextChange(it))
+                    },
+                    onCreate = {
+                        onAction(PlaylistAction.onCreateClick(it))
+                        onAction(PlaylistAction.onDismissSheet)
+                    },
+                    title = state.title
 
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
-                            .wrapContentSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                )
 
-                        Text(
-                            text = stringResource(R.string.create_new_playlist),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                        Spacer(modifier = Modifier.height(18.dp))
-                        OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = CircleShape,
-                            value = title,
-                            trailingIcon = {
-                                Text(
-
-                                    text = "${title.length}/40",
-                                    style = MaterialTheme.typography.bodySmallRegular,
-                                    color = MaterialTheme.colorScheme.secondary
-                                )
-                            },
-                            textStyle = MaterialTheme.typography.bodyLargeRegular,
-                            onValueChange = {
-                                val filtered = it.take(40)
-
-                                title = filtered
-
-                            },
-                            singleLine = true,
-                            placeholder = {
-                                Text(
-                                    text = stringResource(R.string.enter_playlist_name),
-                                    style = MaterialTheme.typography.bodyLargeRegular,
-
-                                    )
-                            },
-
-
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = MaterialTheme.colorScheme.onPrimary,
-                                focusedBorderColor = MaterialTheme.colorScheme.surface,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.surface,
-                                unfocusedTextColor = MaterialTheme.colorScheme.secondary,
-                                focusedContainerColor = MaterialTheme.colorScheme.hover,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.hover,
-                            )
-                        )
-
-                        Spacer(modifier = Modifier.height(18.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            OutlinedButton(
-                                onClick = { onAction(PlaylistAction.onDismissSheet)
-                                        title = ""
-                                    }, modifier = Modifier.width(180.dp)
-                                    .height(44.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.cancel),
-                                    style = MaterialTheme.typography.bodyLargeMedium,
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-
-                            }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Button(
-                                onClick = { onAction(PlaylistAction.onCreateClick(title))
-                                           title = ""
-
-                                          },
-                                enabled = title.isNotEmpty(),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.hover,
-                                    disabledContentColor = MaterialTheme.colorScheme.secondary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                                    disabledContainerColor = MaterialTheme.colorScheme.hover
-
-                                ), modifier = Modifier.fillMaxWidth().width(180.dp).height(44.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.create),
-                                    style = MaterialTheme.typography.bodyLargeMedium,
-                                )
-
-                            }
-
-                        }
-
-
-                    }
-                }
             }
         }
     }

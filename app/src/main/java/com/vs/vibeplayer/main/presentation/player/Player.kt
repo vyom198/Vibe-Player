@@ -29,6 +29,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -57,8 +58,12 @@ import com.vs.vibeplayer.core.theme.DarkSlateGrey
 import com.vs.vibeplayer.core.theme.bodyMediumRegular
 import com.vs.vibeplayer.core.theme.bodySmallRegular
 import com.vs.vibeplayer.core.theme.hover
+import com.vs.vibeplayer.main.presentation.components.CreatePlaylistBottomSheet
+import com.vs.vibeplayer.main.presentation.components.ObserveAsEvents
 import com.vs.vibeplayer.main.presentation.player.components.PlaybackControls
 import com.vs.vibeplayer.main.presentation.player.components.PlaylistForBS
+import com.vs.vibeplayer.main.presentation.playlist.PlaylistEvent
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -69,6 +74,41 @@ fun PlayerRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    ObserveAsEvents(
+        flow = viewModel.events
+    ) {event ->
+        when(event) {
+            is PlaylistEvent.OnCreateChannel -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                            message = if(event.isExists)"Playlist already exists" else "Added to playlist ${event.title}",
+                            duration = SnackbarDuration.Short
+                        )
+
+                    }
+
+
+            }
+
+            is PlayerEvent.OnSongAdd -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = if(event.isExists)"Song already exists in  ${event.title}" else "Added to playlist ${event.title}",
+                        duration = SnackbarDuration.Short)
+
+                }
+            }
+
+            is PlayerEvent.OnAddedToFavourites ->{
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = if(event.isAdded) "Added to favourites" else "Already in Favourites",
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+        }
+    }
     PlayerScreen(
         state = state,
         onAction = viewModel::onAction,
@@ -149,7 +189,7 @@ fun PlayerScreen(
                     }
                     ){
                     Icon(painter = painterResource(
-                        id = if(true) R.drawable.heart_filled else R.drawable.heart_outlined
+                        id = if(state.isFavourite) R.drawable.heart_filled else R.drawable.heart_outlined
                     ),contentDescription = null ,
                         tint = Color.Unspecified)
                 }
@@ -284,6 +324,20 @@ fun PlayerScreen(
                 Spacer(modifier = Modifier.height(17.dp))
             }
         }
+
+        if(state.isCreateBottomSheetVisible){
+            CreatePlaylistBottomSheet(
+                onDismiss = { onAction(PlayerAction.onCloseCreateBs) },
+                modalState = rememberModalBottomSheetState(),
+                onValueChange = {
+                    onAction(PlayerAction.onValueChange(it))
+                },
+                onCreate = {title->
+                    onAction(PlayerAction.onCreatePlaylist(title))
+                },
+                title = state.playlistTitle,
+            )
+        }
         if (state.isBottomSheetShowing) {
         ModalBottomSheet(
             dragHandle = null,
@@ -307,7 +361,7 @@ fun PlayerScreen(
                             painter = painterResource(id = R.drawable.playlist_icon),
                             contentDescription = null,
                             modifier = Modifier.size(64.dp).clickable{
-                                onAction(PlayerAction.onCreatePlaylist)
+                                onAction(PlayerAction.OnCreateIconClick)
                             },
                             tint = Color.Unspecified
                         )
@@ -329,7 +383,9 @@ fun PlayerScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth().padding(end = 4.dp)
-                        .height(88.dp),
+                        .height(88.dp).clickable{
+                            onAction(PlayerAction.OnFavouriteClicked)
+                        },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AsyncImage(
@@ -347,7 +403,7 @@ fun PlayerScreen(
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "${state.favouriteSongs.size} Songs", color = MaterialTheme.colorScheme.secondary,
+                            text = "${state.favouriteSongssize} Songs", color = MaterialTheme.colorScheme.secondary,
                             style = MaterialTheme.typography.bodyMediumRegular
                         )
 
@@ -374,16 +430,4 @@ fun PlayerScreen(
 
 }
 
-//@Preview
-//@Composable
-//private fun PlayerScreenPrev() {
-//    VibePlayerTheme {
-//        PlayerScreen(
-//            state = PlayerUIState(),
-//            onAction = {},
-//            NavigateBack = {}
-//        )
-//    }
-//
-//}
 

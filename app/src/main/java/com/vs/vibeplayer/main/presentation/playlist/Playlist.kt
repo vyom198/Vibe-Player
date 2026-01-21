@@ -177,7 +177,7 @@ fun PlaylistScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = "2 Songs", color = MaterialTheme.colorScheme.secondary,
+                        text = "${state.favouriteSongssize} Songs", color = MaterialTheme.colorScheme.secondary,
                         style = MaterialTheme.typography.bodyMediumRegular
                     )
 

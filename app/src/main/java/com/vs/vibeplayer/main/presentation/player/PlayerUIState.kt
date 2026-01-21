@@ -1,12 +1,10 @@
 package com.vs.vibeplayer.main.presentation.player
 
-import android.provider.MediaStore
 import com.vs.vibeplayer.core.database.track.TrackEntity
-import com.vs.vibeplayer.main.presentation.model.AudioTrackUI
 import com.vs.vibeplayer.main.presentation.model.PlaylistUI
 
 
-data class PlayerUIState(
+data class  PlayerUIState(
     val isPlaying: Boolean = false,
     val currentSong:  TrackEntity? = null,
     val currentPosition: Long = 0L,
@@ -18,14 +16,11 @@ data class PlayerUIState(
     val isShuffleEnabled: Boolean = false,
     val isBottomSheetShowing : Boolean = false,
     val playlists : List<PlaylistUI> = emptyList() ,
-    val favouriteSongs : List<AudioTrackUI> = emptyList()
+    val favouriteSongs : Set<Long> = emptySet(),
+    val isCreateBottomSheetVisible : Boolean  = false,
+    val playlistTitle : String = ""
 ){
-    val progress: Float
-        get() = if (duration > 0) {
-            currentPosition.toFloat() / duration.toFloat()
-        } else {
-            0f
-        }
+
     val  totalDuration : String
         get() = if(duration > 0){
             val totalSeconds = duration/ 1000
@@ -45,6 +40,16 @@ data class PlayerUIState(
         }else{
             "00:00"
         }
+
+    val isFavourite : Boolean
+        get() = if(favouriteSongs.isNotEmpty()){
+            favouriteSongs.contains(currentSong?.id)
+        }else{
+            false
+        }
+
+    val favouriteSongssize : Int
+        get() = if(favouriteSongs.isNotEmpty()) favouriteSongs.size else 0
 
 }
 

@@ -33,4 +33,7 @@ interface PlaylistDao {
     @Query("SELECT * FROM playlistentity WHERE title = :title")
     suspend fun getplaylistByTitle(title: String) : PlaylistEntity
 
+    @Query("SELECT * FROM playlistentity WHERE id = :id")
+    suspend fun getplaylistById ( id : Long ) : PlaylistEntity
+
 }

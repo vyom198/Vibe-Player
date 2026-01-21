@@ -1,8 +1,6 @@
 package com.vs.vibeplayer.main.domain.audio
 
-import android.graphics.Bitmap
 import android.net.Uri
-import kotlin.time.Duration
 
 data class AudioTrack(
     val id : Long ,

@@ -38,6 +38,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -116,6 +118,7 @@ fun AddSongsScreen(
     onBackClick: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
+    val focusManager = LocalFocusManager.current
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = {
@@ -184,51 +187,74 @@ fun AddSongsScreen(
                 .padding(horizontal = 16.dp)
                 .fillMaxSize()
         ) {
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                value = searchText,
-                onValueChange = {
-                    onAction(AddSongsAction.OnTextChange(it))
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = DarkBlueGrey28,
-                    unfocusedBorderColor = DarkBlueGrey28,
-                    focusedContainerColor = MaterialTheme.colorScheme.hover,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.hover,
-                ),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.search),
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = "Search",
-                        style = MaterialTheme.typography.bodyLargeRegular,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                },
+            Row(modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically) {
 
-                shape = CircleShape,
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    value = searchText,
+                    onValueChange = {
+                        onAction(AddSongsAction.OnTextChange(it))
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = DarkBlueGrey28,
+                        unfocusedBorderColor = DarkBlueGrey28,
+                        focusedContainerColor = MaterialTheme.colorScheme.hover,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.hover,
+                    ),
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.search),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    },
+                    placeholder = {
+                        Text(
+                            text = "Search",
+                            style = MaterialTheme.typography.bodyLargeRegular,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    },
 
-                trailingIcon = {
-                    Icon(
-                        modifier = Modifier.clickable {
-                            onAction(AddSongsAction.OnClearClick)
-                        },
-                        imageVector = Icons.Default.Close,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.disabled
+                    shape = CircleShape,
+
+                    trailingIcon = {
+                        Icon(
+                            modifier = Modifier.clickable {
+                                onAction(AddSongsAction.OnClearClick)
+                            },
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.disabled
+                        )
+
+                    }
+
+                )
+                Spacer(
+                    modifier = Modifier.width(
+                        8.dp
                     )
-
+                )
+                if (searchText.isNotEmpty()) {
+                    TextButton(onClick = {
+                        focusManager.clearFocus()
+                        onAction(AddSongsAction.OnClearClick)
+                    }) {
+                        Text(
+                            text = "Cancel",
+                            style = MaterialTheme.typography.bodyLargeMedium,
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    }
                 }
+            }
 
-            )
+
 
             if (state.searchResults.isNotEmpty()) {
                 LazyColumn(modifier = Modifier.fillMaxSize(),) {
@@ -294,4 +320,5 @@ fun AddSongsScreen(
     }
 
 }
+
 

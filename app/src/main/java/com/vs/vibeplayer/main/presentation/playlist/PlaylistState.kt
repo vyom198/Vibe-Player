@@ -6,6 +6,10 @@ data class PlaylistState(
  val isShowing : Boolean = false,
  val isExists : Boolean = false,
  val playlists : List<PlaylistUI> = emptyList() ,
- val title : String = ""
+ val title : String = "",
+ val favouriteSongs  : Set<Long> = emptySet()
 
-)
+){
+ val favouriteSongssize : Int
+  get() = if(favouriteSongs.isNotEmpty()) favouriteSongs.size else 0
+}

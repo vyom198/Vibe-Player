@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.vs.vibeplayer.core.database.playlist.PlaylistDao
 import com.vs.vibeplayer.core.database.playlist.PlaylistEntity
 import com.vs.vibeplayer.core.database.track.TrackDao
+import com.vs.vibeplayer.main.domain.favourite.FavouritePrefs
 import com.vs.vibeplayer.main.presentation.VibePlayer.VibePlayerEvent
 import com.vs.vibeplayer.main.presentation.model.PlaylistUI
 import kotlinx.coroutines.channels.Channel
@@ -20,6 +21,7 @@ import timber.log.Timber
 
 class PlaylistViewModel(
     private val playlistDao: PlaylistDao,
+    private val favouritePrefs: FavouritePrefs
 
 ) : ViewModel() {
     private val eventChannel = Channel<PlaylistEvent>()
@@ -32,6 +34,7 @@ class PlaylistViewModel(
         .onStart {
             if (!hasLoadedInitialData) {
                 getPlaylists()
+                loadFavouriteSongs()
                 hasLoadedInitialData = true
             }
         }
@@ -41,7 +44,22 @@ class PlaylistViewModel(
             initialValue = PlaylistState()
         )
 
-    fun getPlaylists(){
+    private fun loadFavouriteSongs (){
+        viewModelScope.launch {
+            favouritePrefs.getfavouriteList().collect { favouriteSongs ->
+                _state.update {
+                    it.copy(
+                        favouriteSongs = favouriteSongs
+                    )
+
+                }
+
+
+            }
+        }
+    }
+
+    private fun getPlaylists(){
         viewModelScope.launch {
             playlistDao.getAllPlaylist().collect { playlists ->
                 _state.update {
@@ -66,7 +84,7 @@ class PlaylistViewModel(
 
 
 
-    fun insertIfNotExists(title : String) {
+   private fun insertIfNotExists(title : String) {
         viewModelScope.launch {
             val playlistEntity = PlaylistEntity(
                 title = title

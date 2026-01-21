@@ -1,6 +1,7 @@
 package com.vs.vibeplayer.main.presentation.playlist.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,16 +35,18 @@ import com.vs.vibeplayer.main.presentation.model.PlaylistUI
 import timber.log.Timber
 
 @Composable
-fun Playlist( playlists : List<PlaylistUI>) {
+fun Playlist( playlists : List<PlaylistUI>, onPlaylistClick : (PlaylistUI) -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxSize().padding(end = 4.dp)){
         items(playlists){ playlist->
-            PlayListItem(playlist = playlist)
+            PlayListItem(playlist = playlist,
+                onPlaylistClick = onPlaylistClick
+                )
         }
     }
 }
 
 @Composable
-fun PlayListItem(playlist: PlaylistUI) {
+fun PlayListItem(playlist: PlaylistUI, onPlaylistClick: (PlaylistUI) -> Unit) {
     Row(modifier = Modifier.height(88.dp).fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically) {
 
@@ -75,7 +78,10 @@ fun PlayListItem(playlist: PlaylistUI) {
         }
         Icon(
             painter = painterResource(id = R.drawable.menu_dots), contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary
+            tint = MaterialTheme.colorScheme.secondary ,
+            modifier = Modifier.clickable{
+                onPlaylistClick(playlist)
+            }
         )
     }
     HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.hover)

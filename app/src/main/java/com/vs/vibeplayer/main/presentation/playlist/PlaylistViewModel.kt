@@ -9,6 +9,7 @@ import com.vs.vibeplayer.core.database.track.TrackDao
 import com.vs.vibeplayer.main.domain.favourite.FavouritePrefs
 import com.vs.vibeplayer.main.presentation.VibePlayer.VibePlayerEvent
 import com.vs.vibeplayer.main.presentation.model.PlaylistUI
+import com.vs.vibeplayer.main.presentation.model.toPlaylistUI
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -56,6 +57,22 @@ class PlaylistViewModel(
 
 
             }
+        }
+    }
+    private fun renameTitle (title: String){
+        viewModelScope.launch {
+            val playlist = playlistDao.getplaylistById(_state.value.currentPlaylist!!.id)
+            val renamedPlaylist = playlist.copy(
+                title = title
+            )
+            playlistDao.insertIfNotExists(renamedPlaylist)
+            _state.update {
+                it.copy(
+                    isRenamingPlaylist = false,
+                    currentPlaylist = null
+                )
+            }
+
         }
     }
 
@@ -127,12 +144,13 @@ class PlaylistViewModel(
                     )
                 }
             }
-            PlaylistAction.onDismissSheet ->{
+
+            PlaylistAction.onDismissSheet -> {
 
                 _state.update {
                     it.copy(
-                        isShowing = false ,
-                        title =  ""
+                        isShowing = false,
+                        title = ""
 
                     )
                 }
@@ -142,7 +160,6 @@ class PlaylistViewModel(
             is PlaylistAction.onCreateClick -> {
 
                 insertIfNotExists(action.title)
-
 
 
             }
@@ -163,6 +180,91 @@ class PlaylistViewModel(
                     )
                 }
             }
+
+            PlaylistAction.OnFavMenuIconClick -> {
+                _state.update {
+                    it.copy(
+                        isFavSheetVisible = true
+                    )
+                }
+
+            }
+
+            PlaylistAction.onDismissFavSheet -> {
+                _state.update {
+                    it.copy(
+                        isFavSheetVisible = false
+                    )
+                }
+            }
+
+            PlaylistAction.onDismissPlayListSheet -> {
+                _state.update {
+                    it.copy(
+                        isPlayListSheetVisible = false
+                    )
+                }
+
+            }
+
+            is PlaylistAction.onPlaylistMenuIconClick -> {
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isPlayListSheetVisible = true,
+                            currentPlaylist = action.playlistUI
+                        )
+                    }
+                }
+
+            }
+
+            is PlaylistAction.onDeleteButtonClick -> {
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isPlayListSheetVisible = false,
+                            isDeletingPlaylist = true
+                        )
+                    }
+
+                }
+            }
+
+            is PlaylistAction.onRenameButtonClick -> {
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isPlayListSheetVisible = false,
+                            prefilledTitle = _state.value.currentPlaylist!!.title,
+                            isRenamingPlaylist = true,
+                        )
+                    }
+
+                }
+
+            }
+
+            is PlaylistAction.onPrefilledTextChange -> {
+                _state.update {
+                   it.copy(
+                       prefilledTitle = action.prefilledText
+
+                   )
+                }
+
+            }
+
+            PlaylistAction.onDismissRenameSheet -> {
+                _state.update {
+                    it.copy(
+                        isRenamingPlaylist = false,
+                        prefilledTitle = ""
+                    )
+                }
+
+            }
+            is PlaylistAction.onRenameConfirm -> renameTitle(action.title)
         }
     }
 

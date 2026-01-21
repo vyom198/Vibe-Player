@@ -2,6 +2,7 @@ package com.vs.vibeplayer.main.presentation.playlist
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,6 +42,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -52,6 +55,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.vs.vibeplayer.R
 import com.vs.vibeplayer.app.navigation.NavigationRoute
+import com.vs.vibeplayer.core.theme.DarkBlueGrey28
+import com.vs.vibeplayer.core.theme.DarkSlateGrey
 import com.vs.vibeplayer.core.theme.VibePlayerTheme
 import com.vs.vibeplayer.core.theme.bodyLargeMedium
 import com.vs.vibeplayer.core.theme.bodyLargeRegular
@@ -60,7 +65,10 @@ import com.vs.vibeplayer.core.theme.bodySmallRegular
 import com.vs.vibeplayer.core.theme.hover
 import com.vs.vibeplayer.main.presentation.components.CreatePlaylistBottomSheet
 import com.vs.vibeplayer.main.presentation.components.ObserveAsEvents
+import com.vs.vibeplayer.main.presentation.playlist.components.FavBottomSheet
 import com.vs.vibeplayer.main.presentation.playlist.components.Playlist
+import com.vs.vibeplayer.main.presentation.playlist.components.PlaylistBottomSheet
+import com.vs.vibeplayer.main.presentation.playlist.components.RenameBottomSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -185,7 +193,10 @@ fun PlaylistScreen(
 
                 Icon(
                     painter = painterResource(id = R.drawable.menu_dots), contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.clickable{
+                        onAction(PlaylistAction.OnFavMenuIconClick)
+                    }
                 )
 
             }
@@ -216,7 +227,51 @@ fun PlaylistScreen(
                     )
                 }
             } else {
-                Playlist(playlists = state.playlists)
+                Playlist(playlists = state.playlists,
+                          onPlaylistClick = {
+                              onAction(PlaylistAction.onPlaylistMenuIconClick(playlistUI = it))
+                          }
+                        )
+            }
+
+            if(state.isDeletingPlaylist){
+
+            }
+            if(state.isRenamingPlaylist){
+                RenameBottomSheet(
+                    onDismiss = {
+                        onAction(PlaylistAction.onDismissRenameSheet)
+                    },
+                    state = state,
+                    onValueChange = {
+                        onAction(PlaylistAction.onPrefilledTextChange(it))
+                    },
+                    onRenameConfirm = {
+                        onAction(PlaylistAction.onRenameConfirm(it))
+
+                    }
+                )
+            }
+
+            if(state.isFavSheetVisible){
+                FavBottomSheet(state = state,
+                    onDismiss = {
+                        onAction(PlaylistAction.onDismissFavSheet)
+                    })
+            }
+            if(state.isPlayListSheetVisible){
+                PlaylistBottomSheet(
+                    state = state,
+                    onDismiss = {
+                        onAction(PlaylistAction.onDismissPlayListSheet)
+                    },
+                    onDeleteClick = {
+                         onAction(PlaylistAction.onDeleteButtonClick)
+                    },
+                    onRenameClick = {
+                          onAction(PlaylistAction.onRenameButtonClick)
+                    }
+                )
             }
 
             if (state.isShowing) {

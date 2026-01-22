@@ -58,6 +58,7 @@ import com.vs.vibeplayer.core.theme.bodyLargeRegular
 import com.vs.vibeplayer.core.theme.bodyMediumRegular
 import com.vs.vibeplayer.core.theme.hover
 import com.vs.vibeplayer.main.presentation.VibePlayer.components.AudioListItem
+import com.vs.vibeplayer.main.presentation.components.ObserveAsEvents
 import com.vs.vibeplayer.main.presentation.playlist.PlaylistAction
 import org.koin.androidx.compose.koinViewModel
 import java.util.concurrent.atomic.LongAdder
@@ -66,10 +67,18 @@ import java.util.concurrent.atomic.LongAdder
 fun PlaylistDetailRoot(
     viewModel: PlaylistDetailViewModel = koinViewModel(),
     onBackClick : () -> Unit,
-    onAddClick: (String) -> Unit
+    onAddClick: (String) -> Unit,
+    onNavigateToNowPlaying : () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    ObserveAsEvents(flow = viewModel.events) { event ->
+        when (event) {
+           is PlaylistDetailEvent.onNavigateChannel -> {
+               onNavigateToNowPlaying()
+           }
+        }
 
+    }
     PlaylistDetailScreen(
         state = state,
         onAction = viewModel::onAction,
@@ -189,7 +198,10 @@ fun PlaylistDetailScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     OutlinedButton(
-                        onClick = {}, modifier =
+                        onClick = {
+                            onAction(PlaylistDetailAction.onShuffleClick)
+
+                        }, modifier =
                             Modifier.width(186.dp).height(44.dp)
                     ) {
                         Icon(
@@ -202,7 +214,10 @@ fun PlaylistDetailScreen(
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
-                    OutlinedButton(onClick = {}, modifier =
+                    OutlinedButton(onClick = {
+                        onAction(PlaylistDetailAction.onPlayClick)
+
+                    }, modifier =
                         Modifier.width(186.dp).height(44.dp)) {
                         Icon(
                             painter = painterResource(id = R.drawable.outlined_play),

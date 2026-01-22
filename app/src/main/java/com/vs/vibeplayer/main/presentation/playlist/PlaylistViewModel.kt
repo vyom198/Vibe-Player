@@ -99,6 +99,7 @@ class PlaylistViewModel(
                 )
             }
             val trackIds = _state.value.favouriteSongs
+            if(trackIds.isEmpty()) return@launch
             val playlist = trackIds.map {
                 async{
                     trackDao.getTrackById(it)

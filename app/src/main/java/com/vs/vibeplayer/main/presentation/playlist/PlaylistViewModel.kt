@@ -1,15 +1,17 @@
 package com.vs.vibeplayer.main.presentation.playlist
 
-import androidx.lifecycle.SavedStateHandle
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vs.vibeplayer.core.database.playlist.PlaylistDao
 import com.vs.vibeplayer.core.database.playlist.PlaylistEntity
 import com.vs.vibeplayer.core.database.track.TrackDao
 import com.vs.vibeplayer.main.domain.favourite.FavouritePrefs
-import com.vs.vibeplayer.main.presentation.VibePlayer.VibePlayerEvent
+import com.vs.vibeplayer.main.domain.player.PlayerManager
 import com.vs.vibeplayer.main.presentation.model.PlaylistUI
-import com.vs.vibeplayer.main.presentation.model.toPlaylistUI
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,11 +20,13 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class PlaylistViewModel(
     private val playlistDao: PlaylistDao,
-    private val favouritePrefs: FavouritePrefs
+    private val favouritePrefs: FavouritePrefs,
+    private val context : Context,
+    private val trackDao: TrackDao,
+    private val playerManager: PlayerManager
 
 ) : ViewModel() {
     private val eventChannel = Channel<PlaylistEvent>()
@@ -57,6 +61,45 @@ class PlaylistViewModel(
 
 
             }
+        }
+    }
+
+    private fun playingRegularPlaylist(){
+        viewModelScope.launch {
+            val trackIds = _state.value.currentPlaylist?.trackIds
+            if(trackIds.isNullOrEmpty()){
+                eventChannel.send(PlaylistEvent.onRegularPlaylistPlay(isEmpty = true))
+                return@launch
+            }
+            val playlist = trackIds.map {
+                async{
+                    trackDao.getTrackById(it)
+
+                }
+            }.awaitAll().filterNotNull()
+            playerManager.initialize(
+                playlist = playlist
+            )
+            eventChannel.send(PlaylistEvent.onRegularPlaylistPlay(isEmpty = false))
+
+
+        }
+    }
+    private fun playingFavPlaylist(){
+        viewModelScope.launch {
+            val trackIds = _state.value.favouriteSongs
+            val playlist = trackIds.map {
+                async{
+                    trackDao.getTrackById(it)
+
+                }
+            }.awaitAll().filterNotNull()
+
+            playerManager.initialize(
+                playlist = playlist
+            )
+            eventChannel.send(PlaylistEvent.onfavPlayClicked)
+
         }
     }
     private fun renameTitle (title: String){
@@ -138,22 +181,27 @@ class PlaylistViewModel(
     fun onAction(action: PlaylistAction) {
         when (action) {
             PlaylistAction.AddIconClickedOrCreatePlaylist -> {
-                _state.update {
-                    it.copy(
-                        isShowing = true
-                    )
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isShowing = true
+                        )
+                    }
                 }
+
             }
 
             PlaylistAction.onDismissSheet -> {
+             viewModelScope.launch {
+                 _state.update {
+                     it.copy(
+                         isShowing = false,
+                         title = ""
 
-                _state.update {
-                    it.copy(
-                        isShowing = false,
-                        title = ""
+                     )
+                 }
+             }
 
-                    )
-                }
 
             }
 
@@ -165,45 +213,60 @@ class PlaylistViewModel(
             }
 
             PlaylistAction.onSnackBarDismissed -> {
-                _state.update {
-                    it.copy(
-                        isExists = false
-                    )
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isExists = false
+                        )
+                    }
                 }
+
 
             }
 
             is PlaylistAction.onTextChange -> {
-                _state.update {
-                    it.copy(
-                        title = action.title
-                    )
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            title = action.title
+                        )
+                    }
                 }
+
             }
 
             PlaylistAction.OnFavMenuIconClick -> {
-                _state.update {
-                    it.copy(
-                        isFavSheetVisible = true
-                    )
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isFavSheetVisible = true
+                        )
+                    }
                 }
+
 
             }
 
             PlaylistAction.onDismissFavSheet -> {
-                _state.update {
-                    it.copy(
-                        isFavSheetVisible = false
-                    )
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isFavSheetVisible = false
+                        )
+                    }
                 }
+
             }
 
             PlaylistAction.onDismissPlayListSheet -> {
-                _state.update {
-                    it.copy(
-                        isPlayListSheetVisible = false
-                    )
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isPlayListSheetVisible = false
+                        )
+                    }
                 }
+
 
             }
 
@@ -246,25 +309,84 @@ class PlaylistViewModel(
             }
 
             is PlaylistAction.onPrefilledTextChange -> {
-                _state.update {
-                   it.copy(
-                       prefilledTitle = action.prefilledText
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            prefilledTitle = action.prefilledText
 
-                   )
+                        )
+                    }
                 }
+
 
             }
 
             PlaylistAction.onDismissRenameSheet -> {
-                _state.update {
-                    it.copy(
-                        isRenamingPlaylist = false,
-                        prefilledTitle = ""
-                    )
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isRenamingPlaylist = false,
+                            prefilledTitle = ""
+                        )
+                    }
                 }
-
             }
             is PlaylistAction.onRenameConfirm -> renameTitle(action.title)
+            is PlaylistAction.onDeleteConfirm -> onDeleteConfirm(action.id)
+            PlaylistAction.onDismissDeleteSheet -> {
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isDeletingPlaylist = false
+                        )
+                    }
+                }
+            }
+
+            is PlaylistAction.onChangeCover -> coverChange(action.uri)
+            PlaylistAction.photoPickerLaunch -> {
+                viewModelScope.launch {
+                    eventChannel.send(
+                        PlaylistEvent.onCoverChangeChannel
+                    )
+                }
+            }
+
+            PlaylistAction.onPlayClick -> playingFavPlaylist()
+            PlaylistAction.onRegularPlaylistPlay -> playingRegularPlaylist()
+        }
+    }
+
+    private fun coverChange(uri: Uri) {
+        viewModelScope.launch {
+            val cover = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                inputStream.readBytes()
+
+            }
+            val playlist = playlistDao.getplaylistById(_state.value.currentPlaylist!!.id)
+            val updatedPlaylist = playlist.copy(
+                coverArt = cover
+            )
+            playlistDao.insert(updatedPlaylist)
+          _state.update {
+              it.copy(
+                  isPlayListSheetVisible = false,
+                  currentPlaylist = null
+              )
+          }
+        }
+    }
+
+    private fun onDeleteConfirm(id: Long){
+        viewModelScope.launch {
+            playlistDao.deletePlaylistById(id)
+            _state.update {
+                it.copy(
+                    isDeletingPlaylist = false
+                )
+            }
+          eventChannel.send(PlaylistEvent.OnDeleteChannel)
+
         }
     }
 

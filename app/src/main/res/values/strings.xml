@@ -18,6 +18,8 @@
     <string name="create">Create\n</string>
     <string name="rename_playlist">Rename Playlist</string>
     <string name="rename">Rename</string>
+    <string name="delete_playlist">Delete Playlist</string>
+    <string name="delete">Delete</string>
 
 </resources>
 

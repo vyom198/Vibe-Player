@@ -1,5 +1,6 @@
 package com.vs.vibeplayer.main.presentation.playlist
 
+import android.net.Uri
 import com.vs.vibeplayer.main.presentation.model.PlaylistUI
 
 sealed interface PlaylistAction {
@@ -20,7 +21,17 @@ sealed interface PlaylistAction {
    data object onRenameButtonClick : PlaylistAction
 
    object onDismissRenameSheet: PlaylistAction
+   object onDismissDeleteSheet: PlaylistAction
    data class onPrefilledTextChange(val prefilledText : String) : PlaylistAction
    data class onRenameConfirm (val title : String) : PlaylistAction
+
+   data class onDeleteConfirm(val id : Long ) : PlaylistAction
+   data class onChangeCover(val uri : Uri) : PlaylistAction
+   data object photoPickerLaunch : PlaylistAction
+   data object onPlayClick: PlaylistAction
+
+   data object onRegularPlaylistPlay : PlaylistAction
+
+
 
 }

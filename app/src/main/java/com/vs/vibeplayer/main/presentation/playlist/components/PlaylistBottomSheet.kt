@@ -42,7 +42,9 @@ fun PlaylistBottomSheet(
     state: PlaylistState,
     onDismiss : ()-> Unit ,
     onDeleteClick : (Long) -> Unit,
-    onRenameClick : (String) -> Unit
+    onRenameClick : (String) -> Unit,
+    onChangeCover : ()->Unit,
+    onPlayClick : () -> Unit
 ) {
     ModalBottomSheet(
         dragHandle = null,
@@ -101,9 +103,7 @@ fun PlaylistBottomSheet(
 
                 ) {
                 IconButton(
-                    onClick = {
-
-                    },
+                    onClick = onPlayClick,
                     modifier = Modifier.size(36.dp).clip(
                         shape = CircleShape
                     ).background(
@@ -172,9 +172,7 @@ fun PlaylistBottomSheet(
 
                 ) {
                 IconButton(
-                    onClick = {
-
-                    },
+                    onClick = onChangeCover,
                     modifier = Modifier.size(36.dp).clip(
                         shape = CircleShape
                     ).background(

@@ -1,6 +1,9 @@
 package com.vs.vibeplayer.main.presentation.playlist
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,6 +68,7 @@ import com.vs.vibeplayer.core.theme.bodySmallRegular
 import com.vs.vibeplayer.core.theme.hover
 import com.vs.vibeplayer.main.presentation.components.CreatePlaylistBottomSheet
 import com.vs.vibeplayer.main.presentation.components.ObserveAsEvents
+import com.vs.vibeplayer.main.presentation.playlist.components.DeleteBottomSheet
 import com.vs.vibeplayer.main.presentation.playlist.components.FavBottomSheet
 import com.vs.vibeplayer.main.presentation.playlist.components.Playlist
 import com.vs.vibeplayer.main.presentation.playlist.components.PlaylistBottomSheet
@@ -72,16 +76,27 @@ import com.vs.vibeplayer.main.presentation.playlist.components.RenameBottomSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import timber.log.Timber
 import kotlin.time.Duration
 
 @Composable
 fun PlaylistRoot(
     viewModel: PlaylistViewModel = koinViewModel(),
-    onCreateClick: (String) -> Unit
+    onCreateClick: (String) -> Unit,
+    onNavigateToPlayer : () -> Unit,
+    onNavigateToPlaylistplayBack : (Long, Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val pickMedia =  rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+
+        if (uri != null) {
+            viewModel.onAction(PlaylistAction.onChangeCover(uri))
+        } else {
+            Timber.d("PhotoPicker: No media selected")
+        }
+    }
     ObserveAsEvents(flow = viewModel.events) { event ->
 
         when(event) {
@@ -99,6 +114,26 @@ fun PlaylistRoot(
                 } else {
                     onCreateClick(event.title!!)
                 }
+            }
+            is PlaylistEvent.OnDeleteChannel -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Playlist deleted",
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+
+            is PlaylistEvent.onCoverChangeChannel ->{
+                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
+
+            is PlaylistEvent.onfavPlayClicked -> {
+                onNavigateToPlayer()
+            }
+
+            is PlaylistEvent.onRegularPlaylistPlay ->{
+                onNavigateToPlaylistplayBack(state.currentPlaylist!!.id ,event.isEmpty)
             }
 
         }
@@ -235,7 +270,15 @@ fun PlaylistScreen(
             }
 
             if(state.isDeletingPlaylist){
-
+                DeleteBottomSheet(
+                    onDismiss = {
+                        onAction(PlaylistAction.onDismissDeleteSheet)
+                    },
+                    id = state.currentPlaylist!!.id,
+                    onDeleteConfirm = {
+                        onAction(PlaylistAction.onDeleteConfirm(it))
+                    }
+                )
             }
             if(state.isRenamingPlaylist){
                 RenameBottomSheet(
@@ -257,7 +300,11 @@ fun PlaylistScreen(
                 FavBottomSheet(state = state,
                     onDismiss = {
                         onAction(PlaylistAction.onDismissFavSheet)
-                    })
+                    },
+                    onPlayClick = {
+                        onAction(PlaylistAction.onPlayClick)
+                    }
+                )
             }
             if(state.isPlayListSheetVisible){
                 PlaylistBottomSheet(
@@ -270,6 +317,12 @@ fun PlaylistScreen(
                     },
                     onRenameClick = {
                           onAction(PlaylistAction.onRenameButtonClick)
+                    },
+                    onChangeCover = {
+                        onAction(PlaylistAction.photoPickerLaunch)
+                    },
+                    onPlayClick = {
+                        onAction(PlaylistAction.onRegularPlaylistPlay)
                     }
                 )
             }

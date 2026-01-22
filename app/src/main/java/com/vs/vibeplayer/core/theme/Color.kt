@@ -10,7 +10,7 @@ val LightPurple30 = Color(0x4DDE84FF).copy(alpha = 0.3f)
 val DarkBlueGrey28 = Color(0x471A2735).copy(alpha = 0.28f)
 val White = Color(0xFFFFFFFF)
 val LightSteelBlue = Color(0xFFA7BBD1)
-
+val ButtonDestructive = Color(0xffFF5667)
 val SlateGrey = Color(0xFF4C647C)
 val AlmostBlack = Color(0xFF0A131D)
 val DarkSlateGrey = Color(0xFF1A2735)

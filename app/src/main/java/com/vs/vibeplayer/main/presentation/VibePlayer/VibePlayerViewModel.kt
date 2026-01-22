@@ -198,7 +198,17 @@ class VibePlayerViewModel(
             }
 
         }
-    }
+
+            VibePlayerAction.onUpdatingPlayingState ->{
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isPlaying = playerManager.isPlayerEnabled()
+                        )
+                    }
+                }
+            }
+        }
 }
 
 

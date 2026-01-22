@@ -181,7 +181,17 @@ fun NavigationRoot(
         }
 
         composable<NavigationRoute.PlaylistDetail> {
-            PlaylistDetailRoot()
+            PlaylistDetailRoot(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onAddClick = {
+                    navController.navigate(NavigationRoute.AddSongs(it)){
+                        launchSingleTop = true
+                    }
+
+                }
+            )
 
         }
 

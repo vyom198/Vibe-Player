@@ -95,6 +95,7 @@ fun AudioList(
                 style = MaterialTheme.typography.bodyLargeMedium,
                 color = MaterialTheme.colorScheme.secondary
             )
+
         }
 
 
@@ -104,6 +105,7 @@ fun AudioList(
        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp,
            color = DarkBlueGrey28
        )
+
    }
 
 

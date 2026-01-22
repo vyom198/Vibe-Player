@@ -190,6 +190,12 @@ fun NavigationRoot(
                         launchSingleTop = true
                     }
 
+                },
+                onNavigateToNowPlaying = {
+                    navController.navigate(NavigationRoute.PlayerScreen()){
+                        launchSingleTop = true
+                    }
+
                 }
             )
 

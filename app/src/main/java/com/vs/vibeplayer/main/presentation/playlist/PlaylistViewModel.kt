@@ -66,6 +66,11 @@ class PlaylistViewModel(
 
     private fun playingRegularPlaylist(){
         viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isPlayListSheetVisible = false
+                )
+            }
             val trackIds = _state.value.currentPlaylist?.trackIds
             if(trackIds.isNullOrEmpty()){
                 eventChannel.send(PlaylistEvent.onRegularPlaylistPlay(isEmpty = true))
@@ -80,6 +85,7 @@ class PlaylistViewModel(
             playerManager.initialize(
                 playlist = playlist
             )
+
             eventChannel.send(PlaylistEvent.onRegularPlaylistPlay(isEmpty = false))
 
 
@@ -87,6 +93,11 @@ class PlaylistViewModel(
     }
     private fun playingFavPlaylist(){
         viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isFavSheetVisible = false
+                )
+            }
             val trackIds = _state.value.favouriteSongs
             val playlist = trackIds.map {
                 async{
@@ -98,6 +109,7 @@ class PlaylistViewModel(
             playerManager.initialize(
                 playlist = playlist
             )
+
             eventChannel.send(PlaylistEvent.onfavPlayClicked)
 
         }

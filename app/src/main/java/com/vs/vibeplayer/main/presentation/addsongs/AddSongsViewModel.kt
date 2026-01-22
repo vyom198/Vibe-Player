@@ -103,16 +103,23 @@ class AddSongsViewModel(
 
             isInserting = true
            val  playlistEntityfromDb= playlistDao.getplaylistByTitle(playlistTitle)
-            val coverArt = getCoverArt(_state.value.selectedIds.first())
-             val newplayListEntity = PlaylistEntity(
-                id = playlistEntityfromDb.id,
-                title = playlistTitle,
-                trackIds = _state.value.selectedIds.toList(),
-                coverArt = coverArt
-            )
-                 playlistDao.insert(
-                    newplayListEntity
-                )
+            val coverArt = playlistEntityfromDb.coverArt ?: getCoverArt(_state.value.selectedIds.first())
+
+             val updatedPlaylist = if(playlistEntityfromDb.trackIds.isNullOrEmpty() ){
+                 playlistEntityfromDb.copy(
+                     trackIds = _state.value.selectedIds.toList(),
+                     coverArt = coverArt,
+                     id = playlistEntityfromDb.id
+                 )
+             }else{
+                 val newTrackIds = _state.value.selectedIds + playlistEntityfromDb.trackIds!!.toSet()
+                 playlistEntityfromDb.copy(
+                     id = playlistEntityfromDb.id,
+                     trackIds = newTrackIds.toList(),
+
+                 )
+             }
+            playlistDao.insert(updatedPlaylist)
 
             eventChannel.send(AddSongEvent.onInsertEvent)
             isInserting = false

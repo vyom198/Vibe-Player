@@ -18,6 +18,7 @@ import com.vs.vibeplayer.main.presentation.miniplayer.MiniPlayerViewModel
 import com.vs.vibeplayer.main.presentation.permission.PermissionViewModel
 import com.vs.vibeplayer.main.presentation.player.PlayerViewModel
 import com.vs.vibeplayer.main.presentation.playlist.PlaylistViewModel
+import com.vs.vibeplayer.main.presentation.playlistDetail.PlaylistDetailViewModel
 import com.vs.vibeplayer.main.presentation.search.SearchViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
@@ -46,4 +47,5 @@ val mainModule = module {
     viewModelOf(::SearchViewModel)
     viewModelOf(::PlaylistViewModel)
     viewModelOf(::AddSongsViewModel)
+    viewModelOf(::PlaylistDetailViewModel)
 }

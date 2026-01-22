@@ -18,7 +18,8 @@ sealed interface NavigationRoute {
     @Serializable
     data object SearchScreen
 
-
+    @Serializable
+    data class PlaylistDetail(val playlistId : Long)
 
     @Serializable
     data class AddSongs(val playlistTitle : String)

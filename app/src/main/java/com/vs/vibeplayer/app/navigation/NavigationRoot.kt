@@ -22,6 +22,7 @@ import com.vs.vibeplayer.main.presentation.addsongs.AddSongsRoot
 import com.vs.vibeplayer.main.presentation.miniplayer.MiniPlayerRoot
 import com.vs.vibeplayer.main.presentation.player.PlayerRoot
 import com.vs.vibeplayer.main.presentation.playlist.PlaylistRoot
+import com.vs.vibeplayer.main.presentation.playlistDetail.PlaylistDetailRoot
 import com.vs.vibeplayer.main.presentation.search.SearchRoot
 
 @Composable
@@ -87,6 +88,20 @@ fun NavigationRoot(
 
                 onCreateClick = {
                     navController.navigate(NavigationRoute.AddSongs(it)) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigatetoPlayer = {
+                    navController.navigate(NavigationRoute.PlayerScreen()) {
+                        popUpTo(NavigationRoute.VibePlayer) {
+                            inclusive = true
+                        }
+
+                        launchSingleTop = true
+                    }
+                },
+                OnNavigateToPlaylistDetail = {
+                    navController.navigate(NavigationRoute.PlaylistDetail(it)){
                         launchSingleTop = true
                     }
                 }
@@ -163,6 +178,11 @@ fun NavigationRoot(
 
 
             )
+        }
+
+        composable<NavigationRoute.PlaylistDetail> {
+            PlaylistDetailRoot()
+
         }
 
     }

@@ -30,7 +30,6 @@ import com.vs.vibeplayer.R
 import com.vs.vibeplayer.core.theme.bodyLargeMedium
 import com.vs.vibeplayer.core.theme.bodyMediumRegular
 import com.vs.vibeplayer.core.theme.hover
-import com.vs.vibeplayer.main.presentation.playlist.PlaylistAction
 import com.vs.vibeplayer.main.presentation.playlist.PlaylistState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,6 +37,7 @@ import com.vs.vibeplayer.main.presentation.playlist.PlaylistState
 fun FavBottomSheet(
     state: PlaylistState,
     onDismiss : ()-> Unit ,
+    onPlayClick : () -> Unit
 ) {
     ModalBottomSheet(
         dragHandle = null,
@@ -86,9 +86,7 @@ fun FavBottomSheet(
 
                 ) {
                 IconButton(
-                    onClick = {
-
-                    },
+                    onClick = onPlayClick,
                     modifier = Modifier.size(36.dp).clip(
                         shape = CircleShape
                     ).background(

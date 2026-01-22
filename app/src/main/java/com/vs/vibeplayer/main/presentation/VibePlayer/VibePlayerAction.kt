@@ -15,4 +15,6 @@ sealed interface VibePlayerAction {
     data object  onPlayClick  : VibePlayerAction
     data object  shuffleClick  : VibePlayerAction
 
+    data object  onUpdatingPlayingState : VibePlayerAction
+
 }

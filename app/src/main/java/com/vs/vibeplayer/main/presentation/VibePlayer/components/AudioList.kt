@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.vs.vibeplayer.R
 import com.vs.vibeplayer.core.theme.DarkBlueGrey28
@@ -126,7 +127,7 @@ fun AudioListItem(modifier: Modifier = Modifier, item : AudioTrackUI,
             ),
             contentScale = ContentScale.Crop,
             model = item.cover,
-            fallback =painterResource(R.drawable.song_cover_small),
+            error = painterResource(R.drawable.song_cover_small),
             contentDescription = null,
             placeholder = painterResource(R.drawable.song_cover_small)
         )

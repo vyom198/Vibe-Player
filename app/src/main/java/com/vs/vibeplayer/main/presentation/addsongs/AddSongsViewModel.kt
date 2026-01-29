@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.vs.vibeplayer.core.database.playlist.PlaylistDao
 import com.vs.vibeplayer.core.database.playlist.PlaylistEntity
 import com.vs.vibeplayer.core.database.track.TrackDao
+import com.vs.vibeplayer.main.domain.player.PlayerManager
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +23,7 @@ import timber.log.Timber
 class AddSongsViewModel(
     private val trackDao: TrackDao,
     private val savedStateHandle: SavedStateHandle,
-    private val playlistDao : PlaylistDao
+    private val playlistDao : PlaylistDao,
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -112,8 +113,9 @@ class AddSongsViewModel(
                      id = playlistEntityfromDb.id
                  )
              }else{
-                 val newTrackIds = _state.value.selectedIds + playlistEntityfromDb.trackIds!!.toSet()
-                 playlistEntityfromDb.copy(
+                 val newTrackIds = playlistEntityfromDb.trackIds!!.toSet() +  _state.value.selectedIds
+
+                         playlistEntityfromDb.copy(
                      id = playlistEntityfromDb.id,
                      trackIds = newTrackIds.toList(),
 
@@ -126,7 +128,7 @@ class AddSongsViewModel(
         }
 
     }
-    suspend  fun getCoverArt(trackId: Long): ByteArray?{
+    suspend  fun getCoverArt(trackId: Long):String?{
         val trackEntity = trackDao.getTrackById(trackId)
         Timber.d("trackEntity $trackEntity")
         return trackEntity?.cover

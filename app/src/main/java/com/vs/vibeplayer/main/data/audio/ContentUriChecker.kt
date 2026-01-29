@@ -1,11 +1,10 @@
 package com.vs.vibeplayer.main.data.audio
 
 import android.content.Context
-import android.net.Uri
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.core.net.toUri
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.FileNotFoundException
 
@@ -18,11 +17,11 @@ class ContentUriChecker(private val context: Context) {
 
 
                 return@withContext try {
-                    context.contentResolver.openInputStream(uri)?.use {
+                    context.contentResolver.openAssetFileDescriptor(uri, "r")?.use {
                         true
                     } ?: false
                 } catch (e: FileNotFoundException) {
-                    false  // File doesn't exist
+                    false
                 } catch (e: SecurityException) {
                     Timber.e("No permission to access: $uri")
                     false

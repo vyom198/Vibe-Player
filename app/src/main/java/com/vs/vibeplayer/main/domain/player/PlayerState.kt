@@ -12,5 +12,6 @@ data class PlayerState(
     val canGoPrevious: Boolean = false,
     val repeatType: RepeatType = RepeatType.OFF,
     val isShuffleEnabled: Boolean = false,
-    val currentPositionFraction: Float = 0f
+    val currentPositionFraction: Float = 0f,
+    val playerisAvailable : Boolean = false
 )

@@ -84,7 +84,7 @@ fun PlaylistRoot(
     viewModel: PlaylistViewModel = koinViewModel(),
     onCreateClick: (String) -> Unit,
     onNavigateToPlayer : () -> Unit,
-    onNavigateToPlaylistplayBack : (Long, Boolean) -> Unit
+    onNavigateToPlaylistplayBack : (Long) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -133,7 +133,7 @@ fun PlaylistRoot(
             }
 
             is PlaylistEvent.onRegularPlaylistPlay ->{
-                onNavigateToPlaylistplayBack(state.currentPlaylist!!.id ,event.isEmpty)
+                onNavigateToPlaylistplayBack(state.currentPlaylist!!.id )
             }
 
         }

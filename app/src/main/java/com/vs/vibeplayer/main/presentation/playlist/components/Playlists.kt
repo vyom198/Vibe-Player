@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.vs.vibeplayer.R
 import com.vs.vibeplayer.core.theme.bodyMediumRegular
@@ -55,7 +56,7 @@ fun PlayListItem(playlist: PlaylistUI, onPlaylistClick: (PlaylistUI) -> Unit) {
             modifier = Modifier.size(64.dp).clip(
                 CircleShape
             ),
-            fallback = painterResource( R.drawable.playlist_img),
+             error = painterResource( R.drawable.playlist_img),
             contentDescription = null,
             contentScale = ContentScale.Crop
 

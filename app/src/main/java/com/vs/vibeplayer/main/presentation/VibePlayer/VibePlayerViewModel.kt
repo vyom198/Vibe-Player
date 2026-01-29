@@ -21,12 +21,17 @@ import androidx.lifecycle.SavedStateHandle
 import com.vs.vibeplayer.core.database.track.TrackEntity
 import com.vs.vibeplayer.main.data.audio.ContentUriChecker
 import com.vs.vibeplayer.main.domain.player.PlayerManager
+import com.vs.vibeplayer.main.presentation.playlistDetail.PlaylistDetailState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
+import java.io.File
 
 
-class VibePlayerViewModel(
+class  VibePlayerViewModel(
     private val audioDataSource: AudioDataSource,
     private val  trackDao: TrackDao,
     private val contentUriChecker: ContentUriChecker,
@@ -35,35 +40,49 @@ class VibePlayerViewModel(
 ) : ViewModel() {
     private val eventChannel = Channel<VibePlayerEvent>()
     val events = eventChannel.receiveAsFlow()
-    private val _state = MutableStateFlow(VibePlayerState(scanning = true))
-    val state = _state.asStateFlow()
     private var duration by mutableIntStateOf(0)
+    private var hasLoadedInitialData = false
     private var size by mutableIntStateOf(0)
     private var currentPlaylist: List<TrackEntity> = emptyList()
-
-    init {
-
-        _state.update {
-            it.copy(
-                isPlaying = playerManager.isPlayerEnabled()
-            )
+    private val _state = MutableStateFlow(VibePlayerState(scanning = true))
+    val state = _state.onStart {
+        if (!hasLoadedInitialData) {
+            loadInitialData()
+            hasLoadedInitialData = true
         }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = VibePlayerState()
+        )
+
+    private fun loadInitialData() {
         viewModelScope.launch {
+            playerManager.playerState.collect { playerState ->
+                _state.update {
+                    it.copy(
+                        isPlaying = playerState.playerisAvailable
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+
             if (trackDao.getTrackCount() == 0) {
                 loadInitialAudioTracksWithoutFilter()
             } else {
                 loadInitialAudioTracks()
             }
         }
-
     }
+
 
     private fun loadInitialAudioTracks() {
         viewModelScope.launch {
-            Timber.d("loadInitialAudioTracks() called")
             try {
                 trackDao.observeTracks().collect { audioTracks ->
-                    Timber.d("AudioDataSource returned ${audioTracks.size} tracks")
                     val existingTracks = filterExistingTracks(audioTracks)
                     currentPlaylist = existingTracks
 
@@ -101,14 +120,17 @@ class VibePlayerViewModel(
 
             tracks.forEach { track ->
                 val exists = contentUriChecker.checkContentUriExists(track.path)
-                if (exists) {
+                Timber.i("${exists}")
+                if ( exists) {
+
                     existingTracks.add(track)
+
                 } else {
                     tracksToDelete.add(track.id)
                 }
             }
 
-            // Delete non-existent tracks from database
+
             if (tracksToDelete.isNotEmpty()) {
                 trackDao.deleteTracksfromIds(ids = tracksToDelete)
                 Timber.d("Deleted ${tracksToDelete.size} tracks that no longer exist")
@@ -187,6 +209,8 @@ class VibePlayerViewModel(
             VibePlayerAction.onPlayClick -> {
                 viewModelScope.launch {
                     playerManager.initialize(playlist = currentPlaylist)
+
+
                 }
 
             }
@@ -195,17 +219,14 @@ class VibePlayerViewModel(
             viewModelScope.launch {
                 playerManager.initialize(playlist = currentPlaylist)
                 playerManager.shuffleSong()
+
             }
 
         }
 
-            VibePlayerAction.onUpdatingPlayingState ->{
+            VibePlayerAction.onBackHandlerCalled ->{
                 viewModelScope.launch {
-                    _state.update {
-                        it.copy(
-                            isPlaying = playerManager.isPlayerEnabled()
-                        )
-                    }
+                    playerManager.release()
                 }
             }
         }

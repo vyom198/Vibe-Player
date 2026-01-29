@@ -6,7 +6,7 @@ data class SearchResult(
     val id: Long,
     val title: String,
     val artist: String,
-    val cover: ByteArray? = null,
+    val cover: String? = null,
     val totalDurationMs: Long
 ){
     val totalDurationString: String

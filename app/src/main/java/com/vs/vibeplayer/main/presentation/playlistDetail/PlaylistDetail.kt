@@ -46,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
@@ -148,7 +149,7 @@ fun PlaylistDetailScreen(
                 contentScale = ContentScale.Crop,
                 contentDescription = null,
                 placeholder = painterResource(R.drawable.playlist_img),
-                fallback = painterResource(R.drawable.playlist_img)
+              error = painterResource(R.drawable.playlist_img)
 
 
             )

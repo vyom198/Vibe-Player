@@ -6,7 +6,11 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.MediaSourceFactory
 import com.vs.vibeplayer.core.database.track.TrackEntity
+import com.vs.vibeplayer.main.domain.favourite.FavouritePrefs
 import com.vs.vibeplayer.main.domain.player.PlayerManager
 import com.vs.vibeplayer.main.domain.player.PlayerState
 import com.vs.vibeplayer.main.presentation.player.RepeatType
@@ -23,22 +27,27 @@ import timber.log.Timber
 
 class ExoPlayerManager(
     private val context : Context,
+
 ): PlayerManager {
 
     private var player: ExoPlayer? = null
     private val _playerState = MutableStateFlow(PlayerState())
-
     override val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
     private var positionUpdateJob: Job? = null
     private var originalPlaylist: List<TrackEntity> = emptyList()
-
+    private var currentPlaylistId: Long? = null
+    private var isFavourite : Boolean = false
     private var currentIndex: Int = 0
 
     override fun initialize(
         clickedSong: TrackEntity?,
-        playlist: List<TrackEntity>
+        playlist: List<TrackEntity>,
+        playlistId: Long?,
+        isfavourite: Boolean
     ) {
         release()
+        this.isFavourite = isfavourite
+        this.currentPlaylistId = playlistId
         this.originalPlaylist = playlist
         currentIndex = originalPlaylist.indexOfFirst { it.id == clickedSong?.id }
             .takeIf { it != -1 } ?: 0
@@ -50,10 +59,16 @@ class ExoPlayerManager(
                 addListener(playerListener)
             }
 
+        _playerState.value = _playerState.value.copy(
+            playerisAvailable = isPlayerEnabled()
+        )
+
 
         loadAndPlayCurrentSong()
     }
-
+    override fun isPlayingPlaylist(playlistId: Long): Boolean {
+        return currentPlaylistId == playlistId
+    }
     override fun seekTo(position: Long) {
 
         player?.seekTo(position)
@@ -66,7 +81,9 @@ class ExoPlayerManager(
             } else 0f
         )
     }
-
+    override fun isFavouritePlaying(): Boolean{
+        return isFavourite
+    }
     override fun play() {
         player?.play()
         _playerState.value = _playerState.value.copy(
@@ -92,7 +109,9 @@ class ExoPlayerManager(
         originalPlaylist = emptyList()
         currentIndex = 0
         _playerState.value = PlayerState()
-        originalPlaylist = emptyList()
+        currentPlaylistId = null
+        isFavourite = false
+
 
     }
 
@@ -158,11 +177,53 @@ class ExoPlayerManager(
     }
 
     override fun isPlayerEnabled(): Boolean {
-        val player = this.player ?: return false
+         this.player ?: return false
         return true
     }
 
+     override fun concatMediaSource (playlist : List<TrackEntity>){
+         if (playlist.size == originalPlaylist.size) return
+         val player = this.player ?: return
+         val currentIds = originalPlaylist.map { it.id }.toSet()
 
+       if(isFavourite){
+           val song = originalPlaylist.filter {
+               it !in playlist
+           }
+           originalPlaylist = originalPlaylist - song
+           player.removeMediaItem(player.currentMediaItemIndex)
+           if(originalPlaylist.size==0){
+               player.clearMediaItems()
+               release()
+           }else{
+              next()
+           }
+
+
+       }else{
+           val newSongs = playlist.filter { song ->
+               song.id !in currentIds
+           }
+           originalPlaylist = originalPlaylist + newSongs
+
+           player.addMediaItems(createMediaItems(newSongs))
+       }
+
+    }
+    private fun createMediaItems(newSongs : List<TrackEntity>) : List<MediaItem>{
+        val mediaItems = newSongs.map { song ->
+            MediaItem.Builder()
+                .setUri(song.path.toUri())
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(song.title)
+                        .setArtist(song.artist)
+                        .build()
+                )
+                .build()
+        }
+        return mediaItems
+    }
     private fun startPositionUpdates() {
         stopPositionUpdates() // Clear previous
 
@@ -173,7 +234,6 @@ class ExoPlayerManager(
                     val currentDuration = it.duration
                     val currentMediaItemIndex = it.currentMediaItemIndex
 
-                    // Update currentIndex if it doesn't match ExoPlayer's index
                     if (currentMediaItemIndex != -1 && currentMediaItemIndex != currentIndex) {
                         currentIndex = currentMediaItemIndex
                         updateCurrentSongState()
@@ -202,17 +262,8 @@ class ExoPlayerManager(
         val player = this.player ?: return
 
         // Create MediaItem from current song
-        val mediaItems = currentPlaylist.map { song ->
-            MediaItem.Builder()
-                .setUri(song.path.toUri())
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(song.title)
-                        .setArtist(song.artist)
-                        .build()
-                )
-                .build()
-        }
+        val mediaItems = createMediaItems(currentPlaylist)
+
 
         // Set to player and prepare
         player.setMediaItems(mediaItems)
@@ -241,6 +292,7 @@ class ExoPlayerManager(
                 currentSong = currentSong,
                 canGoNext = player.hasNextMediaItem(),
                 currentPosition =currentPosition,
+                playerisAvailable = isPlayerEnabled(),
                 currentPositionFraction = if (currentDuration > 0) {
                     currentPosition.toFloat() / currentDuration.toFloat()
                 } else 0f,
@@ -321,6 +373,7 @@ class ExoPlayerManager(
             if (currentSong != null) {
                 _playerState.value = _playerState.value.copy(
                     currentSong = currentSong,
+                    playerisAvailable = isPlayerEnabled(),
 
                 )
             }

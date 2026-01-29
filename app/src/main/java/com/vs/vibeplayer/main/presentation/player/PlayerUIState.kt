@@ -18,7 +18,8 @@ data class  PlayerUIState(
     val playlists : List<PlaylistUI> = emptyList() ,
     val favouriteSongs : Set<Long> = emptySet(),
     val isCreateBottomSheetVisible : Boolean  = false,
-    val playlistTitle : String = ""
+    val playlistTitle : String = "",
+    val isPlayerAvailable : Boolean = false
 ){
 
     val  totalDuration : String

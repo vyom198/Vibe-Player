@@ -2,6 +2,7 @@ package com.vs.vibeplayer.main.presentation.playlist
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vs.vibeplayer.core.database.playlist.PlaylistDao
@@ -10,6 +11,7 @@ import com.vs.vibeplayer.core.database.track.TrackDao
 import com.vs.vibeplayer.main.domain.favourite.FavouritePrefs
 import com.vs.vibeplayer.main.domain.player.PlayerManager
 import com.vs.vibeplayer.main.presentation.model.PlaylistUI
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
@@ -20,6 +22,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.io.File
 
 class PlaylistViewModel(
     private val playlistDao: PlaylistDao,
@@ -71,22 +75,7 @@ class PlaylistViewModel(
                     isPlayListSheetVisible = false
                 )
             }
-            val trackIds = _state.value.currentPlaylist?.trackIds
-            if(trackIds.isNullOrEmpty()){
-                eventChannel.send(PlaylistEvent.onRegularPlaylistPlay(isEmpty = true))
-                return@launch
-            }
-            val playlist = trackIds.map {
-                async{
-                    trackDao.getTrackById(it)
-
-                }
-            }.awaitAll().filterNotNull()
-            playerManager.initialize(
-                playlist = playlist
-            )
-
-            eventChannel.send(PlaylistEvent.onRegularPlaylistPlay(isEmpty = false))
+            eventChannel.send(PlaylistEvent.onRegularPlaylistPlay)
 
 
         }
@@ -108,7 +97,8 @@ class PlaylistViewModel(
             }.awaitAll().filterNotNull()
 
             playerManager.initialize(
-                playlist = playlist
+                playlist = playlist ,
+                isfavourite = true
             )
 
             eventChannel.send(PlaylistEvent.onfavPlayClicked)
@@ -371,22 +361,32 @@ class PlaylistViewModel(
     }
 
     private fun coverChange(uri: Uri) {
-        viewModelScope.launch {
-            val cover = context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                inputStream.readBytes()
+        viewModelScope.launch(Dispatchers.IO) {
+            try{
+                val fileName = "playlist_cover_${System.currentTimeMillis()}.jpg"
+                val localFile = File(context.filesDir, fileName)
 
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    localFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                val localUriString = localFile.toUri().toString()
+                val playlist = playlistDao.getplaylistById(_state.value.currentPlaylist!!.id)
+                val updatedPlaylist = playlist.copy(
+                    coverArt = localUriString
+                )
+                playlistDao.insert(updatedPlaylist)
+                _state.update {
+                    it.copy(
+                        isPlayListSheetVisible = false,
+                        currentPlaylist = null
+                    )
+                }
+            }catch (e: Exception){
+                Timber.e("URI permission error: ${e.message}")
             }
-            val playlist = playlistDao.getplaylistById(_state.value.currentPlaylist!!.id)
-            val updatedPlaylist = playlist.copy(
-                coverArt = cover
-            )
-            playlistDao.insert(updatedPlaylist)
-          _state.update {
-              it.copy(
-                  isPlayListSheetVisible = false,
-                  currentPlaylist = null
-              )
-          }
+
         }
     }
 

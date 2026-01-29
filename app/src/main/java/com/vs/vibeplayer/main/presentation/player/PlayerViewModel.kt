@@ -11,6 +11,7 @@ import com.vs.vibeplayer.main.domain.player.PlayerManager
 import com.vs.vibeplayer.main.presentation.model.PlaylistUI
 import com.vs.vibeplayer.main.presentation.playlist.PlaylistEvent
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,6 +54,12 @@ class PlayerViewModel(
     private fun loadFavouriteSongs() {
         viewModelScope.launch {
             favouritePrefs.getfavouriteList().collect { favouriteSongs ->
+                if(playerManager.isFavouritePlaying()){
+                    val songs = favouriteSongs.map {
+                        async {  trackDao.getTrackById(it)!!}
+                    }.awaitAll()
+                    playerManager.concatMediaSource(songs)
+                }
                 _state.update {
                     it.copy(
                         favouriteSongs = favouriteSongs
@@ -114,7 +121,9 @@ class PlayerViewModel(
                     canGoPrevious = playerState.canGoPrevious,
                     repeatType = playerState.repeatType,
                     isShuffleEnabled = playerState.isShuffleEnabled,
-                    currentPositionFraction = playerState.currentPositionFraction
+                    currentPositionFraction = playerState.currentPositionFraction,
+                    isPlayerAvailable = playerState.playerisAvailable
+
                 )
             }
         }
@@ -280,4 +289,5 @@ class PlayerViewModel(
         playerManager.release()
         super.onCleared()
     }
+
 }

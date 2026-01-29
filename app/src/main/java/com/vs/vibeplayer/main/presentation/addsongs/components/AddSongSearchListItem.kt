@@ -21,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.vs.vibeplayer.R
 import com.vs.vibeplayer.core.theme.LightSteelBlue
@@ -59,7 +60,7 @@ fun AddSongSearchResultItem(modifier: Modifier = Modifier, item : AddSongResult,
                 ),
             contentScale = ContentScale.Crop,
             model = item.cover,
-            fallback =painterResource(R.drawable.song_cover_small),
+            error =painterResource(R.drawable.song_cover_small),
             contentDescription = null,
             placeholder = painterResource(R.drawable.song_cover_small)
         )

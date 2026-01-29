@@ -363,6 +363,18 @@ class PlaylistViewModel(
     private fun coverChange(uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
             try{
+                val playlist = playlistDao.getplaylistById(_state.value.currentPlaylist!!.id)
+                playlist.coverArt?.let { oldPath ->
+                    try {
+                        val oldFile = File(Uri.parse(oldPath).path ?: "")
+                        if (oldFile.exists()) {
+                            val deleted = oldFile.delete()
+                            Timber.d("Old cover deleted: $deleted")
+                        }
+                    } catch (e: Exception) {
+                        Timber.e("Failed to delete old cover file: ${e.message}")
+                    }
+                }
                 val fileName = "playlist_cover_${System.currentTimeMillis()}.jpg"
                 val localFile = File(context.filesDir, fileName)
 
@@ -372,7 +384,7 @@ class PlaylistViewModel(
                     }
                 }
                 val localUriString = localFile.toUri().toString()
-                val playlist = playlistDao.getplaylistById(_state.value.currentPlaylist!!.id)
+
                 val updatedPlaylist = playlist.copy(
                     coverArt = localUriString
                 )

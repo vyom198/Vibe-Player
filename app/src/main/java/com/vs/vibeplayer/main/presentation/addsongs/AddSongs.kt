@@ -1,7 +1,6 @@
 package com.vs.vibeplayer.main.presentation.addsongs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -24,8 +22,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
@@ -42,10 +38,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,23 +47,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vs.vibeplayer.R
-import com.vs.vibeplayer.core.buttons.VButton
 import com.vs.vibeplayer.core.theme.DarkBlueGrey28
-import com.vs.vibeplayer.core.theme.VibePlayerTheme
 import com.vs.vibeplayer.core.theme.bodyLargeMedium
 import com.vs.vibeplayer.core.theme.bodyLargeRegular
 import com.vs.vibeplayer.core.theme.bodyMediumRegular
-import com.vs.vibeplayer.core.theme.bodySmallRegular
 import com.vs.vibeplayer.core.theme.disabled
 import com.vs.vibeplayer.core.theme.hover
 import com.vs.vibeplayer.main.presentation.addsongs.components.AddSongSearchResultItem
 import com.vs.vibeplayer.main.presentation.addsongs.components.CustomCheckBox
 import com.vs.vibeplayer.main.presentation.components.ObserveAsEvents
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 

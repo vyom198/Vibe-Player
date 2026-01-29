@@ -3,6 +3,7 @@ package com.vs.vibeplayer.main.presentation.addsongs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -188,11 +189,13 @@ fun AddSongsScreen(
                 .fillMaxSize()
         ) {
             Row(modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically) {
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+                ) {
 
                 OutlinedTextField(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .weight(1f)
                         .wrapContentHeight(),
                     value = searchText,
                     onValueChange = {
@@ -235,11 +238,7 @@ fun AddSongsScreen(
                     }
 
                 )
-                Spacer(
-                    modifier = Modifier.width(
-                        8.dp
-                    )
-                )
+
                 if (searchText.isNotEmpty()) {
                     TextButton(onClick = {
                         focusManager.clearFocus()

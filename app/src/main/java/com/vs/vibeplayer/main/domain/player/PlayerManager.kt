@@ -7,14 +7,15 @@ import kotlinx.coroutines.flow.StateFlow
 interface PlayerManager {
     val playerState: StateFlow<PlayerState>
 
-    fun initialize(clickedSong: TrackEntity? = null , playlist: List<TrackEntity>)
+    fun initialize(clickedSong: TrackEntity? = null ,
+                   playlist: List<TrackEntity>,playlistId: Long? = null, isfavourite : Boolean = false)
 
     fun seekTo(position: Long)
     fun play()
     fun pause()
     fun stop()
     fun release()
-
+    fun concatMediaSource(playlist: List<TrackEntity>)
     fun next()
     fun previous()
 
@@ -26,5 +27,8 @@ interface PlayerManager {
 
 
     fun isPlayerEnabled(): Boolean
+
+    fun isPlayingPlaylist(playlistId: Long): Boolean
+    fun isFavouritePlaying(): Boolean
 }
 

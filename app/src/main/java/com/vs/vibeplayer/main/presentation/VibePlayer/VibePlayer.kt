@@ -1,5 +1,6 @@
 package com.vs.vibeplayer.main.presentation.VibePlayer
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -82,6 +83,9 @@ fun VibePlayerRoot(
     OnNavigateToPlaylistDetail : (Long) -> Unit
 ){
     val state by viewModel.state.collectAsStateWithLifecycle()
+    BackHandler {
+       viewModel.onAction(VibePlayerAction.onBackHandlerCalled)
+    }
     VibePlayerScreen(
         state = state,
         onAction = viewModel::onAction,
@@ -306,13 +310,9 @@ fun VibePlayerScreen(
                             1 -> PlaylistRoot(
                                 onCreateClick = onCreateClick,
                                 onNavigateToPlayer = onNavigatetoPlayer,
-                                onNavigateToPlaylistplayBack ={id,empty ->
-                                    if(empty){
-                                       OnNavigateToPlaylistDetail(id)
-                                    }else{
-                                        OnNavigateToPlaylistDetail(id)
-                                        onAction(VibePlayerAction.onUpdatingPlayingState)
-                                    }
+                                onNavigateToPlaylistplayBack ={id->
+                                    OnNavigateToPlaylistDetail(id)
+
                                 }
                             )
 

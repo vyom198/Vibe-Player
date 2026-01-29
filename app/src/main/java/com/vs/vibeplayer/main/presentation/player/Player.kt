@@ -1,5 +1,6 @@
 package com.vs.vibeplayer.main.presentation.player
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +51,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.vs.vibeplayer.R
@@ -65,6 +67,7 @@ import com.vs.vibeplayer.main.presentation.player.components.PlaylistForBS
 import com.vs.vibeplayer.main.presentation.playlist.PlaylistEvent
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import timber.log.Timber
 
 @Composable
 fun PlayerRoot(
@@ -74,6 +77,9 @@ fun PlayerRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    BackHandler {
+        navigateBack.invoke()
+    }
     ObserveAsEvents(
         flow = viewModel.events
     ) {event ->
@@ -109,12 +115,15 @@ fun PlayerRoot(
             }
         }
     }
-    PlayerScreen(
-        state = state,
-        onAction = viewModel::onAction,
-        NavigateBack =navigateBack,
-        snackbarHostState = snackbarHostState
-    )
+
+          PlayerScreen(
+              state = state,
+              onAction = viewModel::onAction,
+              NavigateBack =navigateBack,
+              snackbarHostState = snackbarHostState
+          )
+
+
 }
 
 
@@ -128,6 +137,7 @@ fun PlayerScreen(
     snackbarHostState: SnackbarHostState
 
 ) {
+
     val modalsheet = rememberModalBottomSheetState ()
     Scaffold(
         snackbarHost = {
@@ -211,7 +221,7 @@ fun PlayerScreen(
 
             Spacer(modifier = Modifier.height(70.dp))
             AsyncImage(
-                model = state.currentSong?.cover,
+                model = state.currentSong?.cover?.toUri(),
                 error = painterResource(id = R.drawable.song_img),
                 placeholder = painterResource(id = R.drawable.song_img),
                 contentDescription = null,

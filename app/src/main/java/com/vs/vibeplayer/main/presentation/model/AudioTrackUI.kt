@@ -7,7 +7,7 @@ data class AudioTrackUI(
     val id: Long,
     val title: String,
     val artist: String,
-    val cover: ByteArray? = null,
+    val cover: String? = null,
     val path: Uri? = null,
     val totalDurationMs: Long
 ) {
@@ -23,31 +23,5 @@ data class AudioTrackUI(
         }
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
 
-        other as AudioTrackUI
-
-        if (id != other.id) return false
-        if (totalDurationMs != other.totalDurationMs) return false
-        if (title != other.title) return false
-        if (artist != other.artist) return false
-        if (!cover.contentEquals(other.cover)) return false
-        if (path != other.path) return false
-        if (totalDurationString != other.totalDurationString) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + totalDurationMs.hashCode()
-        result = 31 * result + title.hashCode()
-        result = 31 * result + artist.hashCode()
-        result = 31 * result + (cover?.contentHashCode() ?: 0)
-        result = 31 * result + (path?.hashCode() ?: 0)
-        result = 31 * result + totalDurationString.hashCode()
-        return result
-    }
 }

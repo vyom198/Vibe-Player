@@ -49,14 +49,23 @@ class PlaylistDetailViewModel(
            playlistDao.getPlaylistByIdFlow(playlistId!!).collect { entity ->
              val songs =  entity.trackIds?.map {id->
                  async{
-                     trackDao.getTrackById(id)!!.toAudioTrackUI()
+                     trackDao.getTrackById(id)!!
                  }
              }?.awaitAll()?: emptyList()
+               if(playerManager.isPlayingPlaylist(entity.id)){
+                   playerManager.concatMediaSource(
+                       playlist = songs
+                   )
+               }
+
+               val audioTrackUIs = songs.map {
+                   it.toAudioTrackUI()
+               }
                _state.update {
                    it.copy(
                        playlistTitle = entity.title,
                        cover = entity.coverArt,
-                       songList = songs
+                       songList = audioTrackUIs
                    )
                }
            }
@@ -67,14 +76,11 @@ class PlaylistDetailViewModel(
         when (action) {
             PlaylistDetailAction.onPlayClick -> {
                 viewModelScope.launch {
-                    val currentPlayingSong = playerManager.playerState.value.currentSong
-                    val currentPosition = playerManager.playerState.value.currentPosition
                         val songList = _state.value.songList.map {
                             it.toTrackEntity()
                         }
                     playerManager.release()
-                    playerManager.initialize(playlist = songList , clickedSong = currentPlayingSong)
-                    playerManager.seekTo(currentPosition)
+                    playerManager.initialize(playlist = songList,playlistId = playlistId )
 
 
                     eventChannel.send(PlaylistDetailEvent.onNavigateChannel)
@@ -83,15 +89,13 @@ class PlaylistDetailViewModel(
             }
             PlaylistDetailAction.onShuffleClick -> {
                 viewModelScope.launch {
-                        val currentPlayingSong = playerManager.playerState.value.currentSong
-                        val currentPosition = playerManager.playerState.value.currentPosition
+
                         val songList = _state.value.songList.map{
                             it.toTrackEntity()
                         }
                         playerManager.release()
-                        playerManager.initialize(playlist = songList , clickedSong = currentPlayingSong)
-                        playerManager.seekTo(currentPosition)
-                        playerManager.shuffleSong()
+                        playerManager.initialize(playlist = songList,playlistId = playlistId)
+                       playerManager.shuffleSong()
 
                     eventChannel.send(PlaylistDetailEvent.onNavigateChannel)
 

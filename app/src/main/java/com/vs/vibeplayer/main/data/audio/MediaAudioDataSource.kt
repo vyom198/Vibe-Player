@@ -3,22 +3,15 @@ package com.vs.vibeplayer.main.data.audio
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
-import android.graphics.BitmapFactory
-
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import coil3.Bitmap
 import com.vs.vibeplayer.core.database.track.TrackDao
 import com.vs.vibeplayer.core.database.track.TrackEntity
-
 import com.vs.vibeplayer.main.domain.audio.AudioDataSource
 import com.vs.vibeplayer.main.domain.audio.AudioTrack
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
@@ -39,7 +32,6 @@ class MediaAudioDataSource (
 
     override suspend fun scanAndSave(duration: Int?, size: Int?): Boolean {
         return try {
-            // Get audio tracks using your existing function
 
                 if (trackDao.getTrackCount() > 0) {
                     trackDao.deleteAllTracks()
@@ -47,7 +39,6 @@ class MediaAudioDataSource (
 
             val audioTracks = getAudioTracksWithMetadataRetriever(duration, size)
 
-            // Convert to TrackEntity and save to Room
             val trackEntities = audioTracks.map { audioTrack ->
                 TrackEntity(
                     id = audioTrack.id,
@@ -59,7 +50,7 @@ class MediaAudioDataSource (
                 )
             }
 
-            // Save to database
+
             trackDao.insertAllTracks(trackEntities)
 
             true
@@ -78,9 +69,9 @@ class MediaAudioDataSource (
         val audioFileInfos = getAudioFileInfos(duration, size )
 
         // Step 2: Process each file with MediaMetadataRetriever
-        audioFileInfos.forEach { (uri, filePath) ->
+        audioFileInfos.forEach { (uri, filePath , artWork) ->
             try {
-                val track = extractAudioTrackWithMetadataRetriever(uri, filePath)
+                val track = extractAudioTrackWithMetadataRetriever(uri, filePath,artWork)
                 track?.let { audioTracks.add(it) }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to extract metadata for $uri")
@@ -90,22 +81,21 @@ class MediaAudioDataSource (
         return audioTracks
     }
 
-    private suspend fun getAudioFileInfos(duration: Int?, size: Int?): List<Pair<Uri, String>> = withContext(Dispatchers.IO) {
-        val fileInfos = mutableListOf<Pair<Uri, String>>()
+    private suspend fun getAudioFileInfos(duration: Int?, size: Int?): List<Triple<Uri, String,String?>> = withContext(Dispatchers.IO) {
+        val fileInfos = mutableListOf<Triple<Uri, String , String?>>()
 
-        // Build selection query dynamically
+
         val selection = StringBuilder("${MediaStore.Audio.Media.IS_MUSIC} != 0")
         val selectionArgs = mutableListOf<String>()
 
         // Add duration filter if provided
         if (duration != null) {
-            // Convert seconds to milliseconds (MediaStore duration is in milliseconds)
             val durationInMillis = duration * 1000
             selection.append(" AND ${MediaStore.Audio.Media.DURATION} >= ?")
             selectionArgs.add(durationInMillis.toString())
         }
 
-        // Add size filter if provided
+
         if (size != null) {
             // Convert KB to bytes
             val sizeInBytes = size * 1024
@@ -116,9 +106,10 @@ class MediaAudioDataSource (
 
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.DATA,      // File path
-            MediaStore.Audio.Media.DURATION,  // Duration in milliseconds
-            MediaStore.Audio.Media.SIZE,      // Size in bytes
+            MediaStore.Audio.Media.DATA,
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.SIZE,
+            MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.DATE_ADDED
         )
 
@@ -133,6 +124,7 @@ class MediaAudioDataSource (
             val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
             val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
+            val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID) // <--- 2. GET INDEX
 
             while (cursor.moveToNext()) {
                 try {
@@ -140,13 +132,24 @@ class MediaAudioDataSource (
                     val filePath = cursor.getString(dataColumn)
                     val durationMs = cursor.getLong(durationColumn)
                     val sizeBytes = cursor.getLong(sizeColumn)
+                    val albumId = cursor.getLong(albumIdColumn)
                     if (!filePath.isNullOrEmpty()) {
                         val passesDuration = duration == null || durationMs >= (duration * 1000L)
                         val passesSize = size == null || sizeBytes >= (size * 1024L)
                         if (passesDuration && passesSize) {
                             val contentUri = ContentUris.withAppendedId(audioCollection, id)
-                            fileInfos.add(Pair(contentUri, filePath))
+                            val artUri = ContentUris.withAppendedId(
+                                Uri.parse("content://media/external/audio/albumart"),
+                                albumId
+                            )
+                            val artUriString = if (isFileAccessible(artUri)) {
+                                artUri.toString()
+                            } else {
+                                null // Pass null so your UI knows to show a placeholder
+                            }
+                            fileInfos.add(Triple(contentUri, filePath , artUriString))
                         }
+
                     }
                 } catch (e: Exception) {
                     Timber.e(e, "Error getting audio file info")
@@ -156,10 +159,22 @@ class MediaAudioDataSource (
 
         return@withContext fileInfos
     }
-
+    private fun isFileAccessible(uri: Uri): Boolean {
+        return try {
+            // We open the file descriptor. If the image is missing,
+            // it throws an exception immediately.
+            context.contentResolver.openAssetFileDescriptor(uri, "r")?.use {
+                true
+            } ?: false
+        } catch (e: Exception) {
+            // This is where we catch "File Not Found"
+            false
+        }
+    }
     private suspend fun extractAudioTrackWithMetadataRetriever(
         uri: Uri,
-        filePath: String
+        filePath: String ,
+        artWork: String?
     ): AudioTrack? = withContext(Dispatchers.IO) {
 
         val retriever = MediaMetadataRetriever()
@@ -177,32 +192,12 @@ class MediaAudioDataSource (
             )
             val duration = durationString?.toLongOrNull() ?: 0L
 
-           // val cover = BitmapFactory.decodeByteArray(retriever.embeddedPicture, 0, retriever.embeddedPicture?.size ?: 0)
-            val embeddedPicture =  try {
-                retriever.embeddedPicture
-            }catch (e: Exception){
-                Timber.e(e, "Failed to decode artwork for $filePath")
-                null
-            }
-
-//            val cover = embeddedPicture?.let {
-//                try {
-//                    BitmapFactory.decodeByteArray(it, 0, it.size)
-//
-//                } catch (e: Exception) {
-//                    Timber.e(e, "Failed to decode artwork for $filePath")
-//                    null
-//                }
-//            }
-
-
-
             return@withContext AudioTrack(
                 id = uri.hashCode().toLong(),
-                cover = embeddedPicture,
+                cover = artWork,
                 title = title,
                 artist = artist,
-                path = uri,  // Use the MediaStore URI for playback
+                path = uri,
                 totalDuration = duration,
             )
 

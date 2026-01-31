@@ -54,9 +54,9 @@ jobs:
         with:
           releaseDirectory: app/build/outputs/bundle/release
           signingKeyBase64: ${{secrets.ANDROID_KEYSTORE}}
-          keyStorePassword: ${{secrets.KEYSTORE_PASSWORD}}
+          keyStorePassword: '${{secrets.KEYSTORE_PASSWORD}}'
           alias: ${{secrets.ANDROID_DEVS_ALIAS}}
-          keyPassword: ${{secrets.ANDROID_DEV_ALIAS_PASSWORD}}
+          keyPassword: '${{secrets.ANDROID_DEV_ALIAS_PASSWORD}}'
 
       - name: Setup Athorization with Google play store
         run: echo '${{secrets.PLAY_AUTH_JSON}}' > service_account.json

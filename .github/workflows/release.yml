@@ -43,6 +43,9 @@ jobs:
           gradlePath: app/build.gradle.kts
           versionCode: ${{ github.run_number }}
 
+      - name: grant execute permissions for gradlew
+        run: chmod +x gradlew
+
       - name: assemble release bundle
         run: ./gradlew assembleReleaseBundle
 

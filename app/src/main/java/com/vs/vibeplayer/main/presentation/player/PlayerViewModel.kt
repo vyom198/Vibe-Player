@@ -1,11 +1,15 @@
 package com.vs.vibeplayer.main.presentation.player
 
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vs.vibeplayer.core.database.playlist.PlaylistDao
 import com.vs.vibeplayer.core.database.playlist.PlaylistEntity
 import com.vs.vibeplayer.core.database.track.TrackDao
+import com.vs.vibeplayer.main.data.foreground.VibePlayerService
 import com.vs.vibeplayer.main.domain.favourite.FavouritePrefs
 import com.vs.vibeplayer.main.domain.player.PlayerManager
 import com.vs.vibeplayer.main.presentation.model.PlaylistUI
@@ -27,7 +31,8 @@ class PlayerViewModel(
     private val playerManager: PlayerManager,
     private val trackDao: TrackDao ,
     private val playlistDao: PlaylistDao,
-    private val favouritePrefs: FavouritePrefs
+    private val favouritePrefs: FavouritePrefs,
+    private val context: Context
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -100,6 +105,7 @@ class PlayerViewModel(
                  trackDao.observeTracks().collect {
                     if (clickedSong != null) {
                         playerManager.initialize(clickedSong,  it)
+
                     }
                 }
 

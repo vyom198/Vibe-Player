@@ -1,6 +1,12 @@
 package com.vs.vibeplayer.app
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.media.session.MediaController
+import android.os.Build
+import com.google.common.util.concurrent.ListenableFuture
 import com.vs.vibeplayer.BuildConfig
 import com.vs.vibeplayer.app.di.appModule
 import com.vs.vibeplayer.core.database.di.databaseModule
@@ -30,5 +36,24 @@ class VibePlayerApp: Application() {
                 databaseModule
             )
         }
+        createNotificationChannel()
+    }
+
+
+
+    private fun  createNotificationChannel(){
+         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+             val channel = NotificationChannel(
+                 "player",
+                 "show_notification",
+                 NotificationManager.IMPORTANCE_HIGH
+
+             )
+             channel.description = "used for showing foreground notification"
+             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+             notificationManager.createNotificationChannel(channel)
+         }
+
+
     }
 }

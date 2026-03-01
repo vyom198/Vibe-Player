@@ -3,6 +3,7 @@ package com.vs.vibeplayer.app
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -19,7 +20,14 @@ class MainActivity : ComponentActivity() {
         val isPermissionAlreadyGranted = sharedPrefs.getBoolean("permission_granted", false)
 
         installSplashScreen()
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                android.graphics.Color.TRANSPARENT
+            ),
+            navigationBarStyle = SystemBarStyle.dark(
+                scrim = android.graphics.Color.TRANSPARENT,
+            )
+        )
         setContent {
             VibePlayerTheme {
                 NavigationRoot(navController = rememberNavController(),

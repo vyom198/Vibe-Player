@@ -1,7 +1,14 @@
 package com.vs.vibeplayer.main.data.player
 
+import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.os.Build
 import androidx.core.net.toUri
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC
+import androidx.media3.common.C.USAGE_MEDIA
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -9,7 +16,15 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MediaSourceFactory
+import androidx.media3.session.MediaController
+import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaSessionService
+import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
+import com.vs.vibeplayer.app.MainActivity
 import com.vs.vibeplayer.core.database.track.TrackEntity
+import com.vs.vibeplayer.main.data.foreground.VibePlayerService
 import com.vs.vibeplayer.main.domain.favourite.FavouritePrefs
 import com.vs.vibeplayer.main.domain.player.PlayerManager
 import com.vs.vibeplayer.main.domain.player.PlayerState
@@ -28,8 +43,8 @@ import timber.log.Timber
 class ExoPlayerManager(
     private val context : Context,
 
-): PlayerManager {
-
+): PlayerManager  {
+    private var controllerFuture: ListenableFuture<MediaController>? = null
     private var player: ExoPlayer? = null
     private val _playerState = MutableStateFlow(PlayerState())
     override val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
@@ -38,6 +53,11 @@ class ExoPlayerManager(
     private var currentPlaylistId: Long? = null
     private var isFavourite : Boolean = false
     private var currentIndex: Int = 0
+    override fun setPlayer(player: ExoPlayer) {
+        this.player = player
+        // Attach your listener here so the Manager can still update StateFlow
+        this.player?.addListener(playerListener)
+    }
 
     override fun initialize(
         clickedSong: TrackEntity?,
@@ -58,13 +78,31 @@ class ExoPlayerManager(
             .apply {
                 addListener(playerListener)
             }
-
         _playerState.value = _playerState.value.copy(
             playerisAvailable = isPlayerEnabled()
         )
-
+        connectService()
 
         loadAndPlayCurrentSong()
+
+    }
+    fun connectService() {
+        val sessionToken = SessionToken(
+            context,
+            ComponentName(context, VibePlayerService::class.java)
+        )
+        controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
+
+        controllerFuture?.addListener({
+            try {
+                // This "gets" the controller, which triggers the Service
+                // and the Notification automatically.
+                controllerFuture?.get()
+                Timber.d("Service connected via Controller")
+            } catch (e: Exception) {
+                Timber.e(e, "Service connection failed")
+            }
+        }, MoreExecutors.directExecutor())
     }
     override fun isPlayingPlaylist(playlistId: Long): Boolean {
         return currentPlaylistId == playlistId
@@ -104,6 +142,7 @@ class ExoPlayerManager(
     }
 
     override fun release() {
+
         player?.release()
         player = null
         originalPlaylist = emptyList()
@@ -135,7 +174,7 @@ class ExoPlayerManager(
         updateCurrentSongState()
     }
 
-
+    override fun getPlayer(): ExoPlayer?  = player
 
     override fun onRepeatClick() {
         val currentType = _playerState.value.repeatType
@@ -218,6 +257,8 @@ class ExoPlayerManager(
                     MediaMetadata.Builder()
                         .setTitle(song.title)
                         .setArtist(song.artist)
+                        .setArtworkUri(song.cover?.toUri())
+                        .setDurationMs(song.totalDuration)
                         .build()
                 )
                 .build()
@@ -304,7 +345,6 @@ class ExoPlayerManager(
         override fun onPlaybackStateChanged(playbackState: Int) {
             when (playbackState) {
                 Player.STATE_READY -> {
-                    // Start playing automatically when ready
                     player?.play()
                     _playerState.value = _playerState.value.copy(
                         currentPositionFraction = 0f,
@@ -380,4 +420,8 @@ class ExoPlayerManager(
         }
 
     }
+
+
+
+
 }

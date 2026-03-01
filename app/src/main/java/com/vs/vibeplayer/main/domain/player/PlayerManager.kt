@@ -1,5 +1,6 @@
 package com.vs.vibeplayer.main.domain.player
 
+import androidx.media3.exoplayer.ExoPlayer
 import com.vs.vibeplayer.core.database.track.TrackEntity
 import kotlinx.coroutines.flow.StateFlow
 
@@ -19,7 +20,7 @@ interface PlayerManager {
     fun next()
     fun previous()
 
-
+    fun getPlayer(): ExoPlayer?
     fun onRepeatClick()
 
     fun shuffleSong()
@@ -30,5 +31,6 @@ interface PlayerManager {
 
     fun isPlayingPlaylist(playlistId: Long): Boolean
     fun isFavouritePlaying(): Boolean
+    fun setPlayer(player: ExoPlayer)
 }
 
